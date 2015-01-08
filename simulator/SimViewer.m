@@ -1,0 +1,237 @@
+classdef SimViewer < handle
+    properties
+        Sim;
+        States;
+        RawData;
+    end
+    
+    methods
+        function this = SimViewer(name)
+            this.States = [];
+            
+            %Filename
+            %TODO: DRY this with what's in SimulateThread
+            if(~exist(SimulateThread.SimObjectFilename(name), 'file'))
+                error(strcat([SimulateThread.SimObjectFilename(name), ' file does not exist']));
+            end
+            
+            
+            simStruct = load(SimulateThread.SimObjectFilename(name), SimulateThread.ObjectName);
+            this.Sim = simStruct.SimulateThread;
+            
+            if(~exist(SimulateThread.CSVFilename(name), 'file'))
+                error(strcat([SimulateThread.CSVFilename(name), ' does not exist']));
+            end
+            
+            this.LoadCSV;
+        end
+        
+        function AnimateSim(this)
+            close all;
+            
+            for state = this.States
+                state.SetState;
+                clf
+                state.Thread.Plot
+                title(sprintf('%.2f(s)', state.Time));
+                pause(0.3);
+            end
+        end
+        
+        function PlotMaterial(this)
+            rightElementPositionMatrix = [];
+            leftElementPositionMatrix = [];
+            
+            electrodeColor = 'k';
+            membraneColor = 'w';
+            
+            time = this.Times;
+            
+            for state = this.States
+                state.SetState;
+                
+                elements = Utils.SortByKey(state.Thread.ElectrodedElements, @(x) -x.EndVertex.Position);
+                
+                rightElementPositionMatrix = [rightElementPositionMatrix; ...
+                    arrayfun(@(x) x.EndVertex.Position, elements)];
+                
+                leftElementPositionMatrix = [leftElementPositionMatrix; ...
+                    arrayfun(@(x) x.StartVertex.Position, elements)];
+            end
+            
+            xlim([min(time), max(time)]);
+            
+            ylim([0, this.States(1).Thread.StretchedLength]);
+            
+            hold on
+            for i=1:size(rightElementPositionMatrix,2)
+                h = area(time, rightElementPositionMatrix(:,i));
+                set(h, 'FaceColor', electrodeColor);
+                
+                h = area(time, leftElementPositionMatrix(:,i));
+                set(h, 'FaceColor', membraneColor);
+            end
+        end
+        
+        function PlotGlobal(this)
+            
+            %%%%Plotting Colours
+            c1 = [1,1,1]; %Cell is on
+            c2 = [0,0,0]; %Cell is off
+            gridColor = [0.3, 0.3, 0.3];
+            
+            %form the image: x is electrode, y is time
+            hold on
+            electrodes = Utils.SortByKey(this.Sim.Thread.Electrodes, @(x) x.EndVertex.Position);
+            globalStates = [];
+            for state = this.States
+                state.SetState;
+                globalStates = [globalStates; arrayfun(@(x) x.GlobalState, electrodes)];
+            end
+            
+            %Make the legend
+            x=0;y=0; ms=15;
+            plot(x,y,'marker','square','markersize',ms,...
+                'markeredgecolor','k','markerfacecolor',c1,...
+                'color','w');
+            plot(x,y,'marker','square','markersize',ms,...
+                'markeredgecolor','k','markerfacecolor',c2,...
+                'color','w');
+            % plot(x,y,'color',c1,'linewidth',lw)
+            legend('G(i) = 0', 'G(i) = 1');
+            % set(legHandle,'color',legColor)
+            % set(legHandle,'FontWeight','bold')
+           
+            %Plot the image
+            times = this.Times;
+            nElectrodes = length(this.Sim.Thread.Electrodes);
+            imagesc(times, 1:nElectrodes, globalStates');
+            colormap(flipud(gray));
+            
+            xlim([min(times), max(times)]);
+            set(gca, 'YTick', 1:nElectrodes);
+            %ylim([1, nElectrodes]);
+            
+            %And the gridlines
+            yGridPositions = 0.5:1:nElectrodes+0.5;
+            for position = yGridPositions
+                x=[times(1), times(end)];
+                y=[position, position];
+                plot(x,y,'color',gridColor)
+            end
+            
+            title('Global State');
+            xlabel('Time (s)');
+            ylabel('Electrode');
+        end
+        
+        function time = Times(this)
+            time = arrayfun(@(x) x.Time, this.States);
+        end
+        
+        %plot element by key, where the root of the key is an element
+        function PlotByKey(this, key)
+            %TODO:
+        end
+        
+        function LoadCSV(this)
+            %TODO: This should probably be a class variable
+            takeLinePeriod = 0.1;
+            
+            id = fopen(this.Sim.CSVFilename(this.Sim.Name), 'r');
+            
+            %Read a line
+            line = this.TakeLine(id);
+            
+            %Get the data
+            this.RawData=[];
+            
+            %The rate: pps
+            %Initialise for the while loop
+            count=0;
+            countPeriod=0;
+            prevTime=0;
+            takeLineSum=0;
+            while line~=-1
+                %Increase line count
+                count=count+1;
+                countPeriod=countPeriod+1;
+                
+                %Get the next line
+                line = this.TakeLine(id);
+                
+                %If we're not at the end
+                if line~=-1
+                    %Add to tSum
+                    dT = line(1) - prevTime;
+                    takeLineSum = takeLineSum + dT;
+                    prevTime = line(1);
+                    
+                    %Get the data, take everything below t=0
+                    %TODO: This is silly, there should be a time indepndant
+                    %solution here
+                    if (line~=-1) & ((takeLineSum>takeLinePeriod) | line(1)<=0)
+                        this.RawData = [this.RawData; line];
+                        
+                        this.SaveState(line);
+                        %Reset sum
+                        takeLineSum=0;
+                    end
+                    
+                    %Print every 100
+                    if countPeriod==100
+                        clc; fprintf('Time Loaded: %.0fs\n',line(1))
+                        countPeriod=0;
+                    end
+                    
+                    %Break if necessary
+                    %                     if rangeSpecified && (line(1)~=-1) && (tRange(2) <= tLineNum(1))
+                    %                         break
+                    %                     end
+                end
+            end
+            
+            %Close the file
+            fclose('all');
+            
+        end
+        
+        
+        %Format: [t, local, global]
+        function SaveState(this, line)
+            
+            nLocalVars = length(this.Sim.Thread.GetLocalState);
+            nGlobalVars = length(this.Sim.Thread.GetGlobalState);
+            
+            total = 1 + nLocalVars + nGlobalVars;
+            
+            %check if line has the correct number of elements
+            width = size(this.RawData,2);
+            if width ~= total
+                error(strcat(['incorrect number of elements: ', total, ...
+                    ' (expecting: ', width]));
+            end
+            
+            %split the line
+            t = line(1);
+            index = 2;
+            
+            localState = line(index : index + nLocalVars - 1);
+            index = index + nLocalVars;
+            
+            globalState = line(index : index + nGlobalVars - 1);
+            
+            this.States = [this.States, ThreadState(this.Sim.Thread, t, localState, globalState)];
+        end
+        
+        function line = TakeLine(this, id)
+            tline = fgetl(id);
+            
+            if tline == -1
+                line = -1;
+            else
+                line = str2num(tline);
+            end
+        end
+    end
+end

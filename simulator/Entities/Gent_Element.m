@@ -1,7 +1,9 @@
-classdef Gent_Element < handle
+classdef Element < handle
     %GENT_ELEMENT is a small bit of material with constant stretch ratio
     %and internal properties
-    %   Detailed explanation goes here
+    %   This class is abstract to allow other 1D deformation models to be
+    %   implemented. More abstraction could be done, but this is intended to
+    %   reflect the equations written up in the paper
     
     %TODO: DRY this up with Gent model
     properties 
@@ -26,7 +28,7 @@ classdef Gent_Element < handle
     
     methods
         %Initialises an element at rest in prestretched configuration
-        function this = Gent_Element( ...
+        function this = Element( ...
             startVertex, ...
             endVertex, ...
             preStretch, ...
@@ -37,19 +39,19 @@ classdef Gent_Element < handle
 
             %TODO: Add a check that the model is a gent
             if(isempty(internalStressModel))
-                error('No model given to Gent_Element constructor')
+                error('No model given to Element constructor')
             end
             
             if(isempty(materialProperties))
-                error('No material properties given to Gent_Element constructor');
+                error('No material properties given to Element constructor');
             end
             
             if(isempty(startVertex))
-                error('Every Gent_Element must define a start vertex');
+                error('Every Element must define a start vertex');
             end
             
             if(isempty(endVertex))
-                error('Every Gent_Element must define a end vertex');
+                error('Every Element must define a end vertex');
             end
             
             if(naturalLength <= 0 || naturalWidth<=0)
@@ -88,6 +90,8 @@ classdef Gent_Element < handle
         function lambdaDot = StretchVelocity(this)
             lambdaDot = this.EndVertex.Velocity - this.StartVertex.Velocity;
         end
+        
+        
         
         %TODO: This should be refactorded whe considering other papers
         function length = Length(this)

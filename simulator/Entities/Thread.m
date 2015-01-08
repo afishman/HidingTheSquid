@@ -27,14 +27,14 @@ classdef Thread < handle
         
         %%TODO: Pair element with model in a tidier way
         %by default a rested element (lambda=xi)
-        %ElementConstructor = @(x)Gent_Element(x,x,this.InternalStressModel);
+        %ElementConstructor = @(x)Element(x,x,this.InternalStressModel);
         
         Vertices = Vertex.empty;
         Electrodes = Electrode.empty;
-        Elements = Gent_Element.empty;
+        Elements = Element.empty;
         
         %TODO: Make this a get property
-        ElectrodedElements = Gent_Element.empty;
+        ElectrodedElements = Element.empty;
     end
     
     methods
@@ -64,7 +64,7 @@ classdef Thread < handle
             for i = 1:nElements
                 origin = this.Vertices(i).Origin + this.Resolution;
                 this.Vertices(i+1) = Vertex(origin, 0, 0);
-                this.Elements(i) = Gent_Element(this.Vertices(i), ...
+                this.Elements(i) = Element(this.Vertices(i), ...
                 this.Vertices(i+1), ...
                 preStretch, ...
                 naturalLength, ...
@@ -207,7 +207,7 @@ classdef Thread < handle
             
             %Gather all elements between start/end vertex
             currentVertex = startVertex;
-            elements = Gent_Element.empty;
+            elements = Element.empty;
             while (currentVertex ~= endVertex)
                 elements(end+1) = currentVertex.RightElement;
                 currentVertex = currentVertex.Next;

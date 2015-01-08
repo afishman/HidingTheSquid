@@ -4,7 +4,7 @@ classdef Electrode < handle
     %   Detailed explanation goes here
     
     properties
-        Elements = Gent_Element.empty;
+        Elements = Element.empty;
         Type = ElectrodeTypeEnum.Undefined;
         
         RCCircuit;

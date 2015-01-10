@@ -36,7 +36,7 @@ classdef Vertex < handle
             if(isempty(this.RightElement) || isempty(this.LeftElement))
                 acceleration = 0;
             else
-                mass = (this.LeftElement + this.RightElement) / 2;
+                mass = (this.LeftElement.Mass + this.RightElement.Mass) / 2;
                 acceleration = (this.LeftElement.Force - this.RightElement.Force)/mass;
             end
         end

@@ -71,6 +71,10 @@ classdef SimViewer < handle
                 h = area(time, leftElementPositionMatrix(:,i));
                 set(h, 'FaceColor', membraneColor);
             end
+            
+            title('Sim Material')
+            xlabel('Time (s)');
+            ylabel('Distance (m)');
         end
         
         function PlotGlobal(this)
@@ -129,9 +133,31 @@ classdef SimViewer < handle
             time = arrayfun(@(x) x.Time, this.States);
         end
         
-        %plot element by key, where the root of the key is an element
-        function PlotByKey(this, key)
-            %TODO:
+        function PlotVoltage(this)
+            this.PlotByKey(@(x) x.Voltage, this.Sim.Thread.Elements);
+            ylabel('Voltage (V)');
+            title('Voltage');
+        end
+        
+        function PlotDVoltage(this)
+            this.PlotByKey(@(x) x.DVoltage, this.Sim.Thread.Elements);
+            ylabel('Voltage (V)');
+            title('D-Voltage');
+        end
+        
+        %plot by key upon the list
+        function PlotByKey(this, key, list)
+            time = this.Times;
+            
+            theArray = [];
+            for state = this.States
+                state.SetState;
+                theArray = [theArray; arrayfun(key, list)];
+            end
+            
+            plot(time, theArray);
+            xlabel('Time (s)')
+            ylabel('the thing');
         end
         
         function LoadCSV(this)

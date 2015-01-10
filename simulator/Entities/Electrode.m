@@ -2,9 +2,10 @@ classdef Electrode < handle
     %ELECTRODE represents a section of material that is covered with
     %electode and hooked up to a RC circuit
     %   Detailed explanation goes here
+    %TODO: Include a stub element
     
     properties
-        Elements = Element.empty;
+        Elements = DissertationElement.empty; 
         Type = ElectrodeTypeEnum.Undefined;
         
         RCCircuit;
@@ -25,12 +26,14 @@ classdef Electrode < handle
     
     methods
         function this = Electrode(elements, electrodeType, rcCircuit, switchingModel)
+            %TODO: Check consistency
             this.Elements = elements;
             this.Type = electrodeType;
             this.RCCircuit = rcCircuit;
             this.SwitchingModel = switchingModel;
             
             %TODO: These should really be get methods
+            %TODO: Origin is better here
             this.StartVertex = Vertex(Inf, 0, 0);
             this.EndVertex = Vertex(-Inf, 0, 0);
             for element = this.Elements
@@ -41,6 +44,8 @@ classdef Electrode < handle
                 if(element.EndVertex.Position > this.EndVertex.Position)
                     this.EndVertex = element.EndVertex;
                 end
+                
+                element.RCCircuit = this.RCCircuit;
             end
             
             this.GlobalState = false;
@@ -82,6 +87,10 @@ classdef Electrode < handle
             end
         end
         
+        
+        function dVoltage = DVoltage(this)
+            dVoltage = arrayfun(@(x) x.DVoltage(this.GlobalState), this.Elements);
+        end
     end
 end
 

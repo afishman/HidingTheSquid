@@ -178,7 +178,6 @@ classdef SimulateThread < handle
         end
        
                 
-        %TODO: These should probably go in simulate thread
         function [value,isterminal,direction] = EventsFun(this, t, y)
             this.Thread.SetLocalState(y);
             [value,isterminal,direction] = arrayfun(@(x) x.EventsFun(t), this.Thread.Electrodes);
@@ -186,7 +185,7 @@ classdef SimulateThread < handle
         
         function outVars = OdeFun(this, t, y)
             this.Thread.SetLocalState(y);
-            outVars = this.Thread.GetLocalState';
+            outVars = this.Thread.GetRateLocalState';
         end
         
         

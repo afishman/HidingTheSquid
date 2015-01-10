@@ -41,9 +41,19 @@ sim = SimulateThread(simName, thread);
 
 
 %plot it!
-showNodes = true;
-sim.Thread.Plot(showNodes);
+% showNodes = true;
+% sim.Thread.Plot(showNodes);
 
 sim.RunSim(10);
 
+viewer = SimViewer('sawOsc');
+close all;
+viewer.PlotMaterial;
+figure
+viewer.PlotGlobal;
+figure
+viewer.PlotVoltage;
+
+figure
+viewer.PlotDVoltage;
 return;

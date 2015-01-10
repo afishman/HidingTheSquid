@@ -1,4 +1,4 @@
-classdef Element < handle
+classdef Element < handle & matlab.mixin.Heterogeneous
     %GENT_ELEMENT is a small bit of material with constant stretch ratio
     %and internal properties
     %   This class is abstract to allow other 1D deformation models to be
@@ -91,17 +91,10 @@ classdef Element < handle
             lambdaDot = this.EndVertex.Velocity - this.StartVertex.Velocity;
         end
         
-        
-        
-        %TODO: This should be refactorded whe considering other papers
         function length = Length(this)
             length = this.NaturalLength * this.StretchRatio;
         end
-        
-        %TODO: This should be refactorded whe considering other papers
-        function length = Width(this)
-            length = this.NaturalWidth * this.StretchRatio;
-        end
+       
         
         function thickness = Thickness(this)
             thickness = this.Volume / (this.Length * this.Width);
@@ -111,40 +104,7 @@ classdef Element < handle
         function volume = Volume(this)
             volume = this.NaturalLength * this.NaturalWidth * this.NaturalThickness;
         end
-        
-        %TODO: This should include electrical stress
-        function stress = Stress(this)
-            stress =  this.ElectricalStress - this.InternalStressModel.Stress(this.StretchRatio, this.Xi);
-        end
-        
-        function dXi = DXi(this)
-            dXi = this.InternalStressModel.DXi(this.StretchRatio, this.Xi);
-        end
-        
-        function capacitance = Capacitance(this)
-            capacitance = (this.MaterialProperties.RelativeDielectricConstant ...
-                * this.Length * this.Width) / this.Thickness;
-        end
-        
-        %TODO: refactor when considering other papers - this is specific to
-        %the thesis! (requires dLength, dWidth, dThickness plus some differentiation)
-        function capDot = CapacitanceDot(this)
-            capDot = 4 * this.StretchRatio.^3 * this.StretchVelocity * this.NaturalLength.^2 * this.NaturalThickness.^-1 * this.MaterialProperties.RelativeDielectricConstant;
-        end
-        
-        %TODO: Should this be calculated here? Or in the RCCircuit?
-        function dVoltage = DVoltage(this, switchClosed)
-            if(isempty(this.RCCircuit))
-                dVoltage = 0;
-            else
-                Vs = this.RCCircuit.SourceVoltage;
-                V = this.Voltage;
-                R = this.RCCircuit.Resistance;
-                CDot = this.Resistance.CapacitanceDot;
-                
-                dVoltage = (Vs - switchClosed*V(1 + R*CDot)) / (R*C);
-            end
-        end
+   
         
         function stress = ElectricalStress(this)
             stress = this.MaterialProperties.RelativeDielectricConstant * this.Voltage.^2 / this.Thickness.^2;
@@ -162,6 +122,36 @@ classdef Element < handle
         function mass = Mass(this)
             mass = this.MaterialProperties.Density * this.Volume;
         end
+        
+        function stress = Stress(this)
+            stress =  this.ElectricalStress - this.InternalStressModel.Stress(this.StretchRatio, this.Xi);
+        end
+        
+        
+        function dVoltage = DVoltage(this, switchClosed)
+            if(isempty(this.RCCircuit))
+                dVoltage = 0;
+            else
+                Vs = this.RCCircuit.SourceVoltage;
+                V = this.Voltage;
+                R = this.RCCircuit.Resistance;
+                C = this.Capacitance;
+                CDot = this.CapacitanceDot;
+                
+                
+                dVoltage = (Vs - switchClosed*V*(1 + R*CDot)) / (R*C);
+            end
+        end
+        
+        function dXi = DXi(this)
+            dXi = this.InternalStressModel.DXi(this.StretchRatio, this.Xi);
+        end
+    end
+    
+    methods (Abstract)
+        capacitance = Capacitance(this);       
+        width = Width(this);
+        capDot = CapacitanceDot(this);
     end
     
 end

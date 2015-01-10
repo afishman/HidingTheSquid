@@ -38,7 +38,11 @@ classdef Gent_Model < handle
             dXi = (this.MuB * this.Jb * xi .* (lambda.^-4 .* xi.^4 - lambda.^2 .* xi.^-2)) ...
                 / (6 * this.Eta * (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3 - this.Jb));
         end
+       
         
+        function width = Width(this)
+           width = this.NaturalWidth * this.StretchRatio;
+        end
     end
     
 end

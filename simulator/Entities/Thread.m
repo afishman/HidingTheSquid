@@ -31,10 +31,12 @@ classdef Thread < handle
         
         Vertices = Vertex.empty;
         Electrodes = Electrode.empty;
-        Elements = Element.empty;
         
-        %TODO: Make this a get property
-        ElectrodedElements = Element.empty;
+        %DissertationElement used here as a stub since matlab does not
+        %allow empty abstrat classes. Any class that inherits from Element
+        %can live in these arrays
+        Elements = DissertationElement.empty;
+        ElectrodedElements = DissertationElement.empty;
     end
     
     methods
@@ -52,7 +54,7 @@ classdef Thread < handle
             
             %Initialise the vertices and elements to the prestretch
             %configuration
-            naturalLength = this.Resolution / preStretch;
+            naturalLength = this.Resolution / this.PreStretch;
             
             %TODO: Refactor this when other models are considered
             naturalWidth = naturalLength;
@@ -61,16 +63,19 @@ classdef Thread < handle
             
             nElements = round(this.StretchedLength / this.Resolution);
             this.Vertices(1) = Vertex(0, 0, 0);
+            
             for i = 1:nElements
                 origin = this.Vertices(i).Origin + this.Resolution;
                 this.Vertices(i+1) = Vertex(origin, 0, 0);
-                this.Elements(i) = Element(this.Vertices(i), ...
-                this.Vertices(i+1), ...
-                preStretch, ...
-                naturalLength, ...
-                naturalWidth, ...
-                this.InternalStressModel, ...
-                this.MaterialProperties);
+                
+                %Only need to edit this line to change the element type
+                this.Elements(i) = DissertationElement(this.Vertices(i), ...
+                    this.Vertices(i+1), ...
+                    preStretch, ...
+                    naturalLength, ...
+                    naturalWidth, ...
+                    this.InternalStressModel, ...
+                    this.MaterialProperties);
             end
         end
         
@@ -207,7 +212,7 @@ classdef Thread < handle
             
             %Gather all elements between start/end vertex
             currentVertex = startVertex;
-            elements = Element.empty;
+            elements = DissertationElement.empty;
             while (currentVertex ~= endVertex)
                 elements(end+1) = currentVertex.RightElement;
                 currentVertex = currentVertex.Next;
@@ -260,7 +265,7 @@ classdef Thread < handle
         end
         
         %For use with an ode solver: state variables of the system
-        %vars are d/dt[disaplcement, velocity, xi, voltage]
+        %vars are [disaplcement, velocity, xi, voltage]
         function state = GetLocalState(this)
             state=[];
             state = [state, arrayfun(@(x) x.Displacement, this.Vertices)];
@@ -270,7 +275,7 @@ classdef Thread < handle
         end
         
         %For use with an ode solver
-        %vars are d/dt[disaplcement, velocity, xi, voltage]
+        %vars are [disaplcement, velocity, xi, voltage]
         function SetLocalState(this, state)
             index = 1;
             displacements = state(index : index+length(this.Vertices)-1);
@@ -304,7 +309,6 @@ classdef Thread < handle
             arrayfun(@(x) x.UpdateGlobalState(time), this.Electrodes);
         end
 
-        
         function SetGlobalState(this, state)
             if(length(state)~=length(this.Electrodes))
                 error('number of state vars does not match number of electrodes: %i (expecting %i)', length(state), length(this.Electrodes));
@@ -313,6 +317,15 @@ classdef Thread < handle
             for i=1:length(this.Electrodes)
                 this.Electrodes(i).GlobalState = state(i);
             end
+        end
+        
+        %output should be d/dt[disaplcement, velocity, xi, voltage]
+        function state = GetRateLocalState(this)
+            state = [];
+            state = [state, arrayfun(@(x) x.Velocity, this.Vertices)];
+            state = [state, arrayfun(@(x) x.Acceleration, this.Vertices)];
+            state = [state, arrayfun(@(x) x.DXi, this.Elements)];
+            state = [state, arrayfun(@(x) x.DVoltage, this.Electrodes)];
         end
         
         function state = GetGlobalState(this)

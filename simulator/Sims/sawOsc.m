@@ -21,7 +21,7 @@ rOn = 2; rOff = 4.8;
 localSwitchingModel = TypeIModel(rOn, rOff);
 
 %External Switch
-timeOn = 0; timeOff = 10;
+timeOn = 0; timeOff = 5;
 externalSwitchingModel = StepModel(timeOn, timeOff);
 
 thread = Thread(stretchedLength, resolution, preStretch, rcCircuit);
@@ -30,7 +30,7 @@ thread.SwitchingModelExternal = externalSwitchingModel;
 
 %Add electrodes to the thread
 thread.AddElectrode(0, cellLength, ElectrodeTypeEnum.ExternallyControlled);
-thread.AddElectrode(cellLength + spacing, cellLength, ElectrodeTypeEnum.LocallyControlled);
+thread.AddElectrode(cellLength + spacing, cellLength, ElectrodeTypeEnum.ExternallyControlled);
 
 
 
@@ -46,12 +46,19 @@ sim.RunSim(10);
 
 viewer = SimViewer('sawOsc');
 close all;
+
+figure
 viewer.PlotMaterial;
+
 figure
 viewer.PlotGlobal;
+
 figure
 viewer.PlotVoltage;
 
 figure
 viewer.PlotDVoltage;
+
+figure
+viewer.PlotStretchRatio;
 return;

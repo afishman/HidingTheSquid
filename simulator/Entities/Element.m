@@ -6,7 +6,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     %   reflect the equations written up in the paper
     
     %TODO: DRY this up with Gent model
-    properties 
+    properties
         Xi;
         Voltage;
         RCCircuit = []; %Should be set by the electrode
@@ -15,9 +15,9 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     properties (SetAccess = private)
         StartVertex;
         EndVertex;
-
+        
         PreStretch;
-
+        
         %Should be a Gent_Model
         InternalStressModel;
         MaterialProperties;
@@ -29,14 +29,14 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     methods
         %Initialises an element at rest in prestretched configuration
         function this = Element( ...
-            startVertex, ...
-            endVertex, ...
-            preStretch, ...
-            naturalLength, ...
-            naturalWidth, ...
-            internalStressModel, ...
-            materialProperties)
-
+                startVertex, ...
+                endVertex, ...
+                preStretch, ...
+                naturalLength, ...
+                naturalWidth, ...
+                internalStressModel, ...
+                materialProperties)
+            
             %TODO: Add a check that the model is a gent
             if(isempty(internalStressModel))
                 error('No model given to Element constructor')
@@ -57,7 +57,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             if(naturalLength <= 0 || naturalWidth<=0)
                 error('all natural dimensions must be > 0')
             end
-
+            
             this.InternalStressModel = internalStressModel;
             this.MaterialProperties = materialProperties;
             
@@ -86,7 +86,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         function lambda = StretchRatio(this)
             lambda = this.PreStretch + (this.EndVertex.Displacement - this.StartVertex.Displacement)/this.NaturalLength;
         end
-     
+        
         function lambdaDot = StretchVelocity(this)
             lambdaDot = this.EndVertex.Velocity - this.StartVertex.Velocity;
         end
@@ -94,28 +94,18 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         function length = Length(this)
             length = this.NaturalLength * this.StretchRatio;
         end
-       
         
         function thickness = Thickness(this)
             thickness = this.Volume / (this.Length * this.Width);
         end
         
-        
         %Incompressibility assumptions makes this a constant
         function volume = Volume(this)
             volume = this.NaturalLength * this.NaturalWidth * this.NaturalThickness;
         end
-   
         
-        function stress = ElectricalStress(this)
-            %stress = this.MaterialProperties.RelativeDielectricConstant * this.Voltage.^2 / this.Thickness.^2;
-            stress = this.Voltage^2 * this.MaterialProperties.RelativeDielectricConstant * this.NaturalThickness^-2 * this.StretchRatio^4;
-        end
-        
-        %TODO: Abstract this
         function area = LengthFaceArea(this)
-            area = this.NaturalLength * this.NaturalThickness * this.StretchRatio^-1;
-            %area = this.Width * this.Thickness;
+            area = this.Width * this.Thickness;
         end
         
         %This is the force in the length direction
@@ -133,6 +123,10 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         
         function stress = MaterialStress(this)
             stress = this.InternalStressModel.Stress(this.StretchRatio, this.Xi);
+        end
+        
+        function stress = ElectricalStress(this)
+            stress = this.MaterialProperties.RelativeDielectricConstant * this.Voltage.^2 / this.Thickness.^2;
         end
         
         function dVoltage = DVoltage(this, switchClosed)
@@ -156,7 +150,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     end
     
     methods (Abstract)
-        capacitance = Capacitance(this);       
+        capacitance = Capacitance(this);
         width = Width(this);
         capDot = CapacitanceDot(this);
     end

@@ -145,6 +145,12 @@ classdef SimViewer < handle
             title('D-Voltage');
         end
         
+        function PlotStretchRatio(this)
+            this.PlotByKey(@(x) x.StretchRatio, this.Sim.Thread.Elements);
+            ylabel('Stretch Ratio');
+            title('Stretch Ratio');
+        end
+        
         %plot by key upon the list
         function PlotByKey(this, key, list)
             time = this.Times;

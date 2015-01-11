@@ -8,7 +8,7 @@ classdef Gent_Model < handle
         MuB=70000;
         Ja=90;
         Jb=30;
-        Tau=3;
+        Tau=0.01;
     end
     
     methods
@@ -18,7 +18,7 @@ classdef Gent_Model < handle
         end
         
         function eta = Eta(this)
-            eta = this.Tau * this.MuB;
+            eta = 6 * this.Tau * this.MuB;
         end
         
         function stress = Stress(this, lambda, xi)
@@ -28,7 +28,7 @@ classdef Gent_Model < handle
 
             %Network B
             netB = (this.MuB * (lambda.^2 .* xi.^-2 - lambda.^-4 .* xi.^4)) / ...
-                   (1 - (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4) ./ this.Jb);
+                   (1 - (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3) ./ this.Jb);
             
             %The total stress
             stress = netA + netB;
@@ -36,12 +36,7 @@ classdef Gent_Model < handle
         
         function dXi = DXi(this, lambda, xi)
             dXi = (this.MuB * this.Jb * xi .* (lambda.^-4 .* xi.^4 - lambda.^2 .* xi.^-2)) ...
-                / (6 * this.Eta * (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3 - this.Jb));
-        end
-       
-        
-        function width = Width(this)
-           width = this.NaturalWidth * this.StretchRatio;
+                / (this.Eta * (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3 - this.Jb));
         end
     end
     

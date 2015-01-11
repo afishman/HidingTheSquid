@@ -140,7 +140,7 @@ classdef SimViewer < handle
         end
         
         function PlotDVoltage(this)
-            this.PlotByKey(@(x) x.DVoltage, this.Sim.Thread.Elements);
+            this.PlotByKey(@(x) x.DVoltage, this.Sim.Thread.Electrodes);
             ylabel('Voltage (V)');
             title('D-Voltage');
         end

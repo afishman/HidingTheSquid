@@ -84,7 +84,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         
         %Lambda is the stretch ratio (in length)
         function lambda = StretchRatio(this)
-            lambda = this.PreStretch + (this.StartVertex.Displacement - this.EndVertex.Displacement)/this.NaturalLength;
+            lambda = this.PreStretch + (this.EndVertex.Displacement - this.StartVertex.Displacement)/this.NaturalLength;
         end
      
         function lambdaDot = StretchVelocity(this)
@@ -100,6 +100,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             thickness = this.Volume / (this.Length * this.Width);
         end
         
+        
         %Incompressibility assumptions makes this a constant
         function volume = Volume(this)
             volume = this.NaturalLength * this.NaturalWidth * this.NaturalThickness;
@@ -107,11 +108,14 @@ classdef Element < handle & matlab.mixin.Heterogeneous
    
         
         function stress = ElectricalStress(this)
-            stress = this.MaterialProperties.RelativeDielectricConstant * this.Voltage.^2 / this.Thickness.^2;
+            %stress = this.MaterialProperties.RelativeDielectricConstant * this.Voltage.^2 / this.Thickness.^2;
+            stress = this.Voltage^2 * this.MaterialProperties.RelativeDielectricConstant * this.NaturalThickness^-2 * this.StretchRatio^4;
         end
         
+        %TODO: Abstract this
         function area = LengthFaceArea(this)
-            area = this.Width * this.Thickness;
+            area = this.NaturalLength * this.NaturalThickness * this.StretchRatio^-1;
+            %area = this.Width * this.Thickness;
         end
         
         %This is the force in the length direction
@@ -124,9 +128,12 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         end
         
         function stress = Stress(this)
-            stress =  this.ElectricalStress - this.InternalStressModel.Stress(this.StretchRatio, this.Xi);
+            stress =  this.ElectricalStress - this.MaterialStress;
         end
         
+        function stress = MaterialStress(this)
+            stress = this.InternalStressModel.Stress(this.StretchRatio, this.Xi);
+        end
         
         function dVoltage = DVoltage(this, switchClosed)
             if(isempty(this.RCCircuit))
@@ -139,7 +146,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 CDot = this.CapacitanceDot;
                 
                 
-                dVoltage = (Vs - switchClosed*V*(1 + R*CDot)) / (R*C);
+                dVoltage = (switchClosed*Vs  - V*(1 + R*CDot)) / (R*C);
             end
         end
         

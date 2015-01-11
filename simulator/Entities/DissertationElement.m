@@ -19,13 +19,14 @@ classdef DissertationElement < Element
             capacitance = this.MaterialProperties.RelativeDielectricConstant ...
                 .* this.NaturalLength.^2 .* this.NaturalThickness.^-1 .* this.StretchRatio.^4;
         end
-       
-        function width = Width(this)
-            width = this.StretchRatio;
-        end
         
         function capDot = CapacitanceDot(this)
             capDot = 4 * this.StretchRatio.^3 * this.StretchVelocity * this.NaturalLength.^2 * this.NaturalThickness.^-1 * this.MaterialProperties.RelativeDielectricConstant;
         end
+        
+        function width = Width(this)
+            width = this.StretchRatio * this.NaturalWidth;
+        end
+        
     end
 end

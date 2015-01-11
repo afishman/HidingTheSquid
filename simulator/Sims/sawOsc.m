@@ -1,6 +1,3 @@
-clearvars
-clc
-
 %The filename
 simName = mfilename;
 
@@ -15,20 +12,21 @@ stretchedLength = 2*cellLength + spacing;
 resolution = cellLength; 
 
 %NOTE: RCCircuit.Default could have been used here
-voltage = 3459.5;
-resistance = 500;
-rcCircuit = RCCircuit(voltage, resistance);
+sourceVoltage = 3459.5;
+resistance = 41400000;
+rcCircuit = RCCircuit(resistance, sourceVoltage);
 
-%Make a thread
+%Switching Model
 rOn = 2; rOff = 4.8;
 localSwitchingModel = TypeIModel(rOn, rOff);
 
+%External Switch
 timeOn = 0; timeOff = 10;
 externalSwitchingModel = StepModel(timeOn, timeOff);
 
 thread = Thread(stretchedLength, resolution, preStretch, rcCircuit);
 thread.SwitchingModelLocal = LocalAlwaysOffModel;
-thread.SwitchingModelExternal = StepModel(0,1);
+thread.SwitchingModelExternal = externalSwitchingModel;
 
 %Add electrodes to the thread
 thread.AddElectrode(0, cellLength, ElectrodeTypeEnum.ExternallyControlled);

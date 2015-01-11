@@ -287,7 +287,7 @@ classdef Thread < handle
             xis = state(index : index+length(this.Elements)-1);
             index = index + length(this.Elements);
             
-            voltages = state(index : index+length(this.Electrodes)-1);
+            voltages = state(index : index+length(this.ElectrodedElements)-1);
             index = index + length(this.ElectrodedElements);
             
             
@@ -300,8 +300,12 @@ classdef Thread < handle
                 this.Elements(i).Xi = xis(i);
             end
             
-            for i=1:length(this.ElectrodedElements)
-                this.ElectrodedElements(i).Voltage = voltages(i);
+            count = 0;
+            for electrode = this.Electrodes
+                for i=1:length(electrode.Elements)
+                    count = count+1;
+                    electrode.Elements(i).Voltage = voltages(count);
+                end
             end
         end
         

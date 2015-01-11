@@ -580,7 +580,7 @@ classdef SimulateThread < handle
         end
         
         function path = SimsFolder()
-            path = 'Sims/';
+            path = 'sims/';
         end
     
     end

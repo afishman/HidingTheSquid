@@ -1,4 +1,4 @@
-classdef TypeIModel < SwitchingModelLocal
+classdef TypeIIModel < SwitchingModelLocal
     %The typeI model is the mean strain across the electrode's elements
     properties
         ROn
@@ -20,11 +20,15 @@ classdef TypeIModel < SwitchingModelLocal
         end
         
         function source = Source(this, electrode)
-            source = mean(arrayfun(@(x)x.StretchRatio,electrode.Elements));
+            if(~isempty(electrode.PreviousElectrode))
+                source = electrode.PreviousElectrode.StretchRatio;
+            else
+                source = 0;
+            end
         end
         
         function state = ActivationRule(this, electrode)
-            state = this.Source(electrode) <= this.ROn;
+            state = this.Source(electrode) >= this.ROn;
         end
         
         function state = DeactivationRule(this, electrode)
@@ -55,4 +59,3 @@ classdef TypeIModel < SwitchingModelLocal
         end
     end
 end
-

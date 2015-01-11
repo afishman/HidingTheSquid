@@ -88,8 +88,25 @@ classdef Electrode < handle
         end
         
         
+        
         function dVoltage = DVoltage(this)
             dVoltage = arrayfun(@(x) x.DVoltage(this.GlobalState), this.Elements);
+        end
+        
+        function stretchRatio = StretchRatio(this)
+            stretchRatio = mean(arrayfun(@(x) x.StretchRatio, this.Elements));
+        end
+        
+        function electrodes = Neighbours(this)
+            electrodes = [];
+            
+            if(~isempty(this.NextElectrode))
+                electrodes = [electrodes, this.NextElectrode];
+            end
+            
+            if(~isempty(this.PreviousElectrode))
+                electrodes = [electrodes, this.PreviousElectrode];
+            end
         end
     end
 end

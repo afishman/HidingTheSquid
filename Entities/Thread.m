@@ -42,11 +42,10 @@ classdef Thread < handle
     methods
         %TODO: ensure properties are nonzero, not an empty constructor
         %Initilises to a prestretched thread at rest
-        function this = Thread(stretchedLength, resolution, preStretch, rcCircuit)
+        function this = Thread(stretchedLength, resolution, preStretch)
             this.StretchedLength = stretchedLength;
             this.PreStretch = preStretch;
             this.Resolution = resolution;
-            this.RCCircuit = rcCircuit;  
             
             if(~Utils.IsApproxMultipleOf(this.Resolution, this.StretchedLength))
                 error('stretched length is not divisible by resolution: \nstretched length %d, \nresolution: %d', this.StretchedLength, this.Resolution); 
@@ -140,12 +139,10 @@ classdef Thread < handle
         function vertexAtPosition = GetVertexAtPosition(this, position)
             vertexAtPosition=[];
             for vertex = this.Vertices
-                
                 if Utils.WithinTolerance(vertex.Position, position)
                     vertexAtPosition = vertex;
                     break
                 end
-                
             end
         end
         
@@ -218,26 +215,43 @@ classdef Thread < handle
                 elements(end+1) = currentVertex.RightElement;
                 currentVertex = currentVertex.Next;
             end
-            
-            %assign the switching model
-            switchingModel = [];
-            switch type
-                case ElectrodeTypeEnum.ExternallyControlled
-                    switchingModel = this.SwitchingModelExternal;
-                    
-                case ElectrodeTypeEnum.LocallyControlled
-                    switchingModel = this.SwitchingModelLocal;
-                    
-                case ElectrodeTypeEnum.Undefined
-                    switchingModel = [];
-            end
-            
+
             %add the electrode
-            newElectrode = Electrode(elements, type, this.RCCircuit, switchingModel);
+            newElectrode = Electrode(elements, type, this.RCCircuit, this.SwitchingModelLocal, this.SwitchingModelExternal);
             newElectrode.NextElectrode = nextElectrode;
             newElectrode.PreviousElectrode = previousElectrode;
             this.ElectrodedElements = [this.ElectrodedElements, newElectrode.Elements];
             this.Electrodes(end+1) = newElectrode;
+        end
+        
+        %returns the first electrode which contains the vertex
+        function electrodeAtVertex = GetElectrodeAtVertex(this, vertex)
+            electrodeAtVertex = [];
+            for electrode = this.Electrodes
+                for v = electrode.Vertices
+                    if v == vertex
+                        electrodeAtVertex = electrode;
+                        break;
+                    end
+                end
+                
+                if(~isempty(electrodeAtVertex))
+                    break;
+                end
+            end
+        end
+       
+        %returns the electrode at the start vertex, if there is one
+        function electrode = StartElectrode(this)
+            electrode = this.GetElectrodeAtVertex(this.StartVertex);
+        end
+        
+        function startVertex = StartVertex(this)
+            startVertex = Utils.MinByKey(this.Vertices, @(x) x.Origin);
+        end
+        
+        function endVertex = EndVertex(this)
+            endVertex = Utils.MinByKey(this.Vertices, @(x) -x.Origin);
         end
         
         %Paints electrodes with equal length and spacing from the start
@@ -335,6 +349,76 @@ classdef Thread < handle
         
         function state = GetGlobalState(this)
             state = arrayfun(@(x) x.GlobalState, this.Electrodes);
+        end
+       
+    end
+    
+    methods(Static)
+        %As derived in the paper
+        %TODO: test and finish or throw away
+        function this = ConstructOptimallySpacedThread(...
+                cellLengthAtPrestretch, ...
+                nCells, ...
+                activatedCellStretch, ...
+                passiveMembraneStretch, ...
+                electrodeType)
+
+            
+            preStretch = sqrt(activatedCellStretch*passiveMembraneStretch);
+            
+            d_C = cellLengthAtPrestretch / preStretch;
+            d_P = d_C * ...
+                ( nCells / (nCells - 1) ) * ...
+                ( (preStretch - cellLengthAtPrestretch) / (preStretch - passiveMembraneStretch) );
+            
+            spacingAtPreStretch = d_P * preStretch;
+            
+            stretchedLength = cellLengthAtPrestretch*nCells + (nCells / (nCells-1)) * spacingAtPreStretch;
+           
+            
+            %Two coarsest resolution is the greatest common divisor of
+            %cellLength and spacing
+            gcdAccuracy = 10^2 / Utils.Order(Utils.Tolerance); %Two orders above tolerance should do it!
+            resolution = gcd(floor(gcdAccuracy*cellLengthAtPrestretch), floor(gcdAccuracy*spacingAtPreStretch)) / gcdAccuracy;
+            
+            %show output and pause
+            clc;
+            fprintf('Constructing thread:\n  PreStretch: %s\n  Resolution: %s', preStretch, resolution);
+            pause(1);
+            
+            %Construct the thread
+            this = Thread(stretchedLength, resolution, preStretch);
+            this.FillWithElectrodes(this.StartVertex, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);
+        end
+        
+        %initialises a thread with equally spaced, locally controlled electrodes
+        function this = ConstructThreadWithSpacedElectrodes( ...
+                preStretch, ...
+                cellLengthAtPrestretch, ...
+                nCells, ...
+                spacingAtPreStretch, ...
+                switchingModelLocal, ...
+                switchingModelExternal, ...
+                rcCircuit)
+        
+            %Two coarsest resolution is the greatest common divisor of
+            %cellLength and spacing
+            gcdAccuracy = 10^2 * 10^(-Utils.Order(Utils.Tolerance)); %Two orders above tolerance should do it!
+            resolution = gcd(floor(gcdAccuracy*cellLengthAtPrestretch), floor(gcdAccuracy*spacingAtPreStretch)) / gcdAccuracy;
+            
+            clc; fprintf('Coarsest resolution calculated to be: %dm', resolution);
+            pause(1);
+            
+            stretchedLength = cellLengthAtPrestretch*nCells + (nCells-1) * spacingAtPreStretch;
+            this = Thread(stretchedLength, resolution, preStretch);
+            
+            this.SwitchingModelLocal = switchingModelLocal;
+            this.SwitchingModelExternal = switchingModelExternal;
+            
+            this.RCCircuit = rcCircuit;
+            
+            electrodeType = ElectrodeTypeEnum.LocallyControlled;
+            this.FillWithElectrodes(this.StartVertex.Origin, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);
         end
     end
 end

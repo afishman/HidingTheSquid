@@ -40,7 +40,7 @@ thread.AddElectrode(cellLength + spacing, cellLength, ElectrodeTypeEnum.LocallyC
 sim = SimulateThread(simName, thread);
 sim.RunSim(7);
 
-viewer = SimViewer('sawOsc');
+viewer = SimViewer(sim.Name);
 close all;
 
 figure

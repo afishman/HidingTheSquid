@@ -32,7 +32,7 @@ classdef TypeIIModel < SwitchingModelLocal
         end
         
         function state = DeactivationRule(this, electrode)
-            state = this.Source(electrode) >= this.ROff;
+            state = this.Source(electrode) <= this.ROff;
         end
         
         %Linear crossings used here
@@ -46,9 +46,9 @@ classdef TypeIIModel < SwitchingModelLocal
         
         function direction = EventsFunDirection(this, electrode)
             if(electrode.GlobalState)
-                direction = 1;
-            else
                 direction = -1;
+            else
+                direction = 1;
             end
         end
     end

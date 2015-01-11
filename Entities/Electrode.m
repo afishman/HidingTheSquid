@@ -12,7 +12,9 @@ classdef Electrode < handle
         
         NextElectrode;
         PreviousElectrode;
-        SwitchingModel;
+        
+        SwitchingModelLocal;
+        SwitchingModelExternal;
         
         %TODO: allow electrode to load its own data
         %This is only public so I can load data into it
@@ -25,12 +27,13 @@ classdef Electrode < handle
     end
     
     methods
-        function this = Electrode(elements, electrodeType, rcCircuit, switchingModel)
+        function this = Electrode(elements, electrodeType, rcCircuit, switchingModelLocal, switchingModelExternal)
             %TODO: Check consistency
             this.Elements = elements;
             this.Type = electrodeType;
             this.RCCircuit = rcCircuit;
-            this.SwitchingModel = switchingModel;
+            this.SwitchingModelLocal = switchingModelLocal;
+            this.SwitchingModelExternal = switchingModelExternal;
             
             %TODO: These should really be get methods
             %TODO: Origin is better here
@@ -49,6 +52,29 @@ classdef Electrode < handle
             end
             
             this.GlobalState = false;
+        end
+        
+        function vertices = Vertices(this)
+            vertices = this.StartVertex;
+            
+            vertex = this.StartVertex;
+            while(vertex ~= this.EndVertex)
+                vertex = vertex.Next;
+                vertices = [vertices, vertex];
+            end
+        end
+        
+        function model = SwitchingModel(this)
+            switch(this.Type)
+                case ElectrodeTypeEnum.LocallyControlled
+                    model = this.SwitchingModelLocal;
+                    
+                case ElectrodeTypeEnum.ExternallyControlled
+                    model = this.SwitchingModelExternal;
+                    
+                case ElectrodeTypeEnum.Undefiuned
+                    model = ExternalAlwaysOffModel;
+            end
         end
         
         %Note: 'time' is unused for local sensing cells. If it needs the time it
@@ -86,8 +112,6 @@ classdef Electrode < handle
                     direction = 1;
             end
         end
-        
-        
         
         function dVoltage = DVoltage(this)
             dVoltage = arrayfun(@(x) x.DVoltage(this.GlobalState), this.Elements);

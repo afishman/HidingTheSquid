@@ -24,11 +24,11 @@ classdef TypeIModel < SwitchingModelLocal
         end
         
         function state = ActivationRule(this, electrode)
-            state = this.Source(electrode) < this.ROn;
+            state = this.Source(electrode) <= this.ROn;
         end
         
         function state = DeactivationRule(this, electrode)
-            state = this.Source(electrode) > this.ROff;
+            state = this.Source(electrode) >= this.ROff;
         end
         
         %Linear crossings used here
@@ -40,9 +40,12 @@ classdef TypeIModel < SwitchingModelLocal
             end
         end
         
-        %Since source increases value, the direction should be up
         function direction = EventsFunDirection(this, electrode)
-            direction = 1;
+            if(electrode.GlobalState)
+                direction = 1;
+            else
+                direction = -1;
+            end
         end
     end
     

@@ -164,11 +164,12 @@ classdef SimViewer < handle
             plot(time, theArray);
             xlabel('Time (s)')
             ylabel('the thing');
+            grid on
         end
         
         function LoadCSV(this)
             %TODO: This should probably be a class variable
-            takeLinePeriod = 0.1;
+            takeLinePeriod = 0.01;
             
             id = fopen(this.Sim.CSVFilename(this.Sim.Name), 'r');
             

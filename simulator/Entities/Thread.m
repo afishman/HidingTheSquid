@@ -79,9 +79,8 @@ classdef Thread < handle
             end
         end
         
-        %TODO: refactor when including different dimensions
         function mass = TotalMass(this)
-            mass = this.NaturalLength^2 * this.NaturalThickness * this.MaterialProperties.Density;
+            mass = sum(arrayfun(@(x) x.Mass, this.Elements));
         end
         
         %TODO: refactor into element
@@ -132,6 +131,8 @@ classdef Thread < handle
             end
 
             xlim([0, this.StretchedLength])
+            xlabel('Distance (m)')
+            set(gca, 'YTick', []);
         end
             
         %TODO: Plot onto a cuttlefish

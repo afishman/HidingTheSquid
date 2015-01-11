@@ -35,7 +35,7 @@ classdef StepModel < SwitchingModelExternal
         end
         
         function direction = EventsFunDirection(this, t)
-            if(this.TimeOn <= t)
+            if(t <= this.TimeOn)
                 direction = -1;
             else
                 direction = 1;
@@ -50,7 +50,7 @@ classdef StepModel < SwitchingModelExternal
             t = linspace(-1,3,100);
             
             states = stepModel.State(t);
-            crossings = stepModel.Crossing(t);
+            values = stepModel.EventsFunValue(t);
             
             figure
             plot(t, states);
@@ -58,7 +58,7 @@ classdef StepModel < SwitchingModelExternal
             xlabel('t'); ylabel('state'); title('state');
             
             figure
-            plot(t, crossings);
+            plot(t, values);
             grid on
             xlabel('t'); ylabel('Crossings'); title('Crossings');
         end

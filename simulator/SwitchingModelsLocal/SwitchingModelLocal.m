@@ -13,7 +13,7 @@ classdef SwitchingModelLocal < SwitchingModel
     methods
         function state = State(this, electrode)
             if(electrode.GlobalState)
-                state = DeactivationRule(this, electrode);
+                state = ~DeactivationRule(this, electrode);
             else
                 state = ActivationRule(this, electrode);
             end

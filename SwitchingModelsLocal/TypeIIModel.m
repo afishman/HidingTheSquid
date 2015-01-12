@@ -6,7 +6,7 @@ classdef TypeIIModel < SwitchingModelLocal
     end
     
     methods
-        function this = TypeIModel(rOn, rOff)
+        function this = TypeIIModel(rOn, rOff)
             if(rOn <= 0)
                 error('TypeIModel rOn should be > 0!')
             end

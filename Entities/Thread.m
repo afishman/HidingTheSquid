@@ -222,6 +222,7 @@ classdef Thread < handle
             newElectrode.PreviousElectrode = previousElectrode;
             this.ElectrodedElements = [this.ElectrodedElements, newElectrode.Elements];
             this.Electrodes(end+1) = newElectrode;
+            this.DefineElectrodeNeighbours;
         end
         
         %returns the first electrode which contains the vertex
@@ -351,6 +352,29 @@ classdef Thread < handle
             state = arrayfun(@(x) x.GlobalState, this.Electrodes);
         end
        
+        function DefineElectrodeNeighbours(this)
+            if(isempty(this.Electrodes))
+                return;
+            end
+            
+            if(length(this.Electrodes)==1)
+                return;
+            end
+            
+            orderedElectrodes = Utils.SortByKey(this.Electrodes, @(x) x.StartVertex.Origin);
+            
+            orderedElectrodes(1).PreviousElectrode = [];
+            orderedElectrodes(1).NextElectrode = orderedElectrodes(2);
+            
+            for i=2:length(orderedElectrodes)-1
+                orderedElectrodes(i).PreviousElectrode = orderedElectrodes(i-1);
+                orderedElectrodes(i).NextElectrode = orderedElectrodes(i+1);
+            end
+            
+            orderedElectrodes(end).PreviousElectrode = orderedElectrodes(end-1);
+            orderedElectrodes(end).NextElectrode = [];
+        end
+        
     end
     
     methods(Static)

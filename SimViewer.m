@@ -151,6 +151,12 @@ classdef SimViewer < handle
             title('Stretch Ratio');
         end
         
+        function PlotSource(this)
+            this.PlotByKey(@(x) x.Source, this.Sim.Thread.Electrodes);
+            ylabel('Source');
+            title('Source');
+        end
+        
         %plot by key upon the list
         function PlotByKey(this, key, list)
             time = this.Times;

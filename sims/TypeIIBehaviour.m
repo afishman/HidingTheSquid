@@ -1,16 +1,16 @@
 %These are optimal paramters
 %TODO: automate the creation of optimally spaced threads
 preStretch = 2.5;
-nCells = 2;
+nCells = 5;
 cellLengthAtPrestretch = 20e-3 * preStretch;
 spacingAtPrestretch = 40e-3 * preStretch;
 electrodeType = ElectrodeTypeEnum.LocallyControlled;
 
 %Define the switching models
 rOn = 3.7; rOff = 2.6;
-switchingModelLocal = LocalAlwaysOffModel;
+switchingModelLocal = TypeIIModel(rOn, rOff);
 
-tEnd = 2.9; period = 0.3;
+tEnd = 5.5; period = 1;
 switchingModelExternal = CyclicSwitchModel(tEnd, period);
 
 %NOTE: RCCircuit.Default could have been used here, This is for
@@ -52,10 +52,7 @@ figure
 viewer.PlotGlobal;
 
 figure
-viewer.PlotVoltage;
-
-figure
-viewer.PlotDVoltage;
+viewer.PlotSource;
 
 figure
 viewer.PlotStretchRatio;

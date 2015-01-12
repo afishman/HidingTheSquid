@@ -113,6 +113,15 @@ classdef Electrode < handle
             end
         end
         
+        %For plotting purposes only
+        function source = Source(this)
+            if this.Type == ElectrodeTypeEnum.LocallyControlled
+                source = this.SwitchingModel.Source(this);
+            else
+                source = 0;
+            end
+        end
+        
         function dVoltage = DVoltage(this)
             dVoltage = arrayfun(@(x) x.DVoltage(this.GlobalState), this.Elements);
         end

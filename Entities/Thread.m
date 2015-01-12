@@ -407,7 +407,7 @@ classdef Thread < handle
             resolution = gcd(floor(gcdAccuracy*cellLengthAtPrestretch), floor(gcdAccuracy*spacingAtPreStretch)) / gcdAccuracy;
             
             clc; fprintf('Coarsest resolution calculated to be: %dm', resolution);
-            pause(1);
+            pause(3);
             
             stretchedLength = cellLengthAtPrestretch*nCells + (nCells-1) * spacingAtPreStretch;
             this = Thread(stretchedLength, resolution, preStretch);

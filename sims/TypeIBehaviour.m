@@ -1,6 +1,3 @@
-%The simulation name
-simName = mfilename;
-
 %These are optimal paramters
 %TODO: automate the creation of optimally spaced threads
 preStretch = 2.5;
@@ -35,14 +32,16 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
 %Set the first electrode to be externally controlled
 thread.StartElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;
 
-%Uncomment this to plot the thread!
+%Uncomment this to plot the thread! (it is currently in prestretch config)
 % showNodes = true;
 % sim.Thread.Plot(showNodes);
 
-%Make a simulator object and run for 10s
+%Make a simulator object and run for 7s
+simName = mfilename;
 sim = SimulateThread(simName, thread);
 sim.RunSim(7);
 
+%View the output
 viewer = SimViewer(sim.Name);
 close all;
 

@@ -70,6 +70,10 @@ classdef Utils
             [~, minIndex] = min(arrayfun(key, list));
             item = list(minIndex);
         end
+        
+        function item = MaxByKey(list, key)
+            item = Utils.MinByKey(list, @(x) key(-x));
+        end
     end
 end
 

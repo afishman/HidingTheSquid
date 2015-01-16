@@ -1,11 +1,16 @@
 classdef SwitchingModelLocal < SwitchingModel
-    %SWITCHINGMODELLOCAL Summary of this class goes here
-    %   Detailed explanation goes here
+    %SWITCHINGMODELLOCAL models the control of locally controlled
+    %electrodes.
     
     methods (Abstract)
+        %As on the paper
         Source(this, electrode);
+        
+        %If the rule returns true, the electrode should toggle its state
         ActivationRule(this, electrode);
         DeactivationRule(this, electrode);
+        
+        %Fun Fun!
         EventsFunValue(this, electrode);
         EventsFunDirection(this, electrode);
     end

@@ -1,5 +1,6 @@
 classdef DissertationElement < Element
     %Cunningly named after the one I did for my master's dissertatioan
+    %Assumes the width and length are always the same
     
     methods
         %Nothing special here
@@ -8,11 +9,10 @@ classdef DissertationElement < Element
             endVertex, ...
             preStretch, ...
             naturalLength, ...
-            naturalWidth, ...
             internalStressModel, ...
             materialProperties)
         
-            this@Element(startVertex, endVertex, preStretch, naturalLength, naturalWidth, internalStressModel, materialProperties);
+            this@Element(startVertex, endVertex, preStretch, naturalLength, internalStressModel, materialProperties);
         end
         
         function capacitance = Capacitance(this)
@@ -28,5 +28,8 @@ classdef DissertationElement < Element
             width = this.StretchRatio * this.NaturalWidth;
         end
         
+        function naturalWidth = NaturalWidth(this)
+            naturalWidth = this.NaturalLength;
+        end
     end
 end

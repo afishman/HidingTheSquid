@@ -4,6 +4,9 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     %   This class is abstract to allow other 1D deformation models to be
     %   implemented. More abstraction could be done, but this is intended to
     %   reflect the equations written up in the paper
+    %
+    %   Implementing new models (such as fiber constrained) should be as
+    %   simple as inheriting from this class
     
     %TODO: DRY this up with Gent model
     properties
@@ -23,7 +26,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         MaterialProperties;
         
         NaturalLength;
-        NaturalWidth;
     end
     
     methods
@@ -33,7 +35,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 endVertex, ...
                 preStretch, ...
                 naturalLength, ...
-                naturalWidth, ...
                 internalStressModel, ...
                 materialProperties)
             
@@ -54,8 +55,8 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 error('Every Element must define a end vertex');
             end
             
-            if(naturalLength <= 0 || naturalWidth<=0)
-                error('all natural dimensions must be > 0')
+            if(naturalLength <= 0)
+                error('naturalLength must be > 0')
             end
             
             this.InternalStressModel = internalStressModel;
@@ -75,7 +76,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             this.Voltage = 0;
             
             this.NaturalLength = naturalLength;
-            this.NaturalWidth = naturalWidth;
         end
         
         function thickness = NaturalThickness(this)
@@ -149,9 +149,11 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         end
     end
     
+    %I think this is what will need to be changed when extending the model
     methods (Abstract)
         capacitance = Capacitance(this);
         width = Width(this);
+        naturalWidth = NaturalWidth(this);
         capDot = CapacitanceDot(this);
     end
     

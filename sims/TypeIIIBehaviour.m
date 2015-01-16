@@ -4,14 +4,14 @@ preStretch = 2.5;
 nCells = 30;
 cellLengthAtPrestretch = 20e-3 * preStretch;
 spacingAtPrestretch = 40e-3 * preStretch;
-electrodeType = ElectrodeTypeEnum.LocallyControlled;
 
 %Define the switching models
-rOn = 3.7; rOff = 2.6;
-switchingModelLocal = TypeIIModel(rOn, rOff);
+rOn1 = 2.9; rOn2 = 4.7;
+rOff1 = 2.7; rOff2 = 4.9;
+switchingModelLocal = TypeIIIModel(rOn1, rOn2, rOff1, rOff2);
 
-tEnd = 5.5; period = 1;
-switchingModelExternal = CyclicSwitchModel(tEnd, period);
+tOn = 0; tOff = 1;
+switchingModelExternal = StepModel(tOn, tOff);
 
 %NOTE: RCCircuit.Default could have been used here, This is for
 %illustrative purposes
@@ -28,6 +28,7 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 switchingModelLocal, ...
                 switchingModelExternal, ...
                 rcCircuit);
+                    
             
 %Set the first electrode to be externally controlled
 thread.StartElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;

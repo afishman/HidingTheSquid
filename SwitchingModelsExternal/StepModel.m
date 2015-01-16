@@ -1,5 +1,5 @@
 classdef StepModel < SwitchingModelExternal
-    %This model is turns on 
+    %This model is on between the on/off time only
     
     properties
         TimeOn;
@@ -17,12 +17,10 @@ classdef StepModel < SwitchingModelExternal
             this.TimeOn = timeOn;
             this.TimeOff = timeOff;
             
-            this.a = (this.TimeOn^2 - this.TimeOff^2)/(2*(this.TimeOn - this.TimeOff));
-            this.b = -(this.TimeOff-this.a)^2;
-            
+            [this.a,this.b] = Utils.QuadraticCoefficients(timeOn, timeOff);
         end
         
-        %For a change at a terminal state, we should change state at the
+        %This logic ensures a change of state at the
         %exact time of TimeOn/TimeOff
         function state = State(this, t)
             state = false(1,length(t));
@@ -31,7 +29,7 @@ classdef StepModel < SwitchingModelExternal
         
         %quadratic crossing
         function value = EventsFunValue(this, t)
-            value = (t - this.a).^2 + this.b;
+            value = Utils.QuadraticFun(t, this.a, this.b);
         end
         
         function direction = EventsFunDirection(this, t)
@@ -64,14 +62,3 @@ classdef StepModel < SwitchingModelExternal
         end
     end
 end
-
-% %Binary: on before tSwitch, off otherwise
-% function [state, crossings]=actiFunBin(t, tSwitch)
-% 
-% crossings = tSwitch-t;
-% 
-% if crossings>0
-%     state = 1;
-% else
-%     state = 0;
-% end

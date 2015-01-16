@@ -1,22 +1,22 @@
 classdef Electrode < handle
     %ELECTRODE represents a section of material that is covered with
-    %electode and hooked up to a RC circuit
+    %compliant, conducting electode and hooked up to a RC circuit
     %   Detailed explanation goes here
     %TODO: Include a stub element
     
     properties
         Elements = DissertationElement.empty; 
-        Type = ElectrodeTypeEnum.Undefined;
+        Type = ElectrodeTypeEnum.Undefined; %Type: ElectrodeTypeEnum
         
         RCCircuit;
         
         NextElectrode;
         PreviousElectrode;
         
+        %The electrode only actually uses one of these 
         SwitchingModelLocal;
         SwitchingModelExternal;
         
-        %TODO: allow electrode to load its own data
         %This is only public so I can load data into it
         GlobalState;
     end
@@ -40,11 +40,11 @@ classdef Electrode < handle
             this.StartVertex = Vertex(Inf, 0, 0);
             this.EndVertex = Vertex(-Inf, 0, 0);
             for element = this.Elements
-                if(element.StartVertex.Position < this.StartVertex.Position)
+                if(element.StartVertex.Origin < this.StartVertex.Origin)
                     this.StartVertex = element.StartVertex;
                 end
                 
-                if(element.EndVertex.Position > this.EndVertex.Position)
+                if(element.EndVertex.Origin > this.EndVertex.Origin)
                     this.EndVertex = element.EndVertex;
                 end
                 
@@ -79,8 +79,6 @@ classdef Electrode < handle
         
         %Note: 'time' is unused for local sensing cells. If it needs the time it
         %should be an externally controlled cell!
-        %TODO: This is abit bodge, the program structure should
-        %ensure the switching model works well with electrode type
         function UpdateGlobalState(this, time)
             switch(this.Type)
                 case ElectrodeTypeEnum.ExternallyControlled
@@ -126,19 +124,21 @@ classdef Electrode < handle
             dVoltage = arrayfun(@(x) x.DVoltage(this.GlobalState), this.Elements);
         end
         
+        %This works well enough, could've also measured the stretch between
+        %the start/end vertex
         function stretchRatio = StretchRatio(this)
             stretchRatio = mean(arrayfun(@(x) x.StretchRatio, this.Elements));
         end
         
         function electrodes = Neighbours(this)
-            electrodes = [];
+            electrodes = Electrode.empty;
             
             if(~isempty(this.NextElectrode))
-                electrodes = [electrodes, this.NextElectrode];
+                electrodes(end+1) = this.NextElectrode;
             end
             
             if(~isempty(this.PreviousElectrode))
-                electrodes = [electrodes, this.PreviousElectrode];
+                electrodes(end+1) = this.PreviousElectrode;
             end
         end
     end

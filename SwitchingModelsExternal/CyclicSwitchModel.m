@@ -6,8 +6,6 @@ classdef CyclicSwitchModel < SwitchingModelExternal
         TStart;
         TEnd;
         Period;
-        Coefficient;
-    
     end
     
     
@@ -19,10 +17,14 @@ classdef CyclicSwitchModel < SwitchingModelExternal
                 error('Period for cyclic switch model must be >0');
             end
             this.Period = period;
-            this.Coefficient = 2*pi/this.Period;
         end
         
-        %The gradient check ensures the change of state always occurs when value=0
+        %For the equation: sin(c*t)
+        function c = Coefficient(this)
+            c = 2*pi/this.Period;
+        end
+        
+        %The gradient check ensures a change of state always occurs when value=0
         function state = State(this,t)
             if t >= this.TEnd
                 state = false;
@@ -52,7 +54,7 @@ classdef CyclicSwitchModel < SwitchingModelExternal
                 gradient = 1;
             end
             
-            end
+        end
         
         function bool = TEndBeforeNextCycle(this, t)
             bool = this.TEnd <= t + this.Period/2;

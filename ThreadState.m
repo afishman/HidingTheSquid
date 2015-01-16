@@ -1,5 +1,6 @@
 classdef ThreadState < handle
-    
+%Stores the global, local and time of a thread
+
     properties
         Thread;
         LocalState;

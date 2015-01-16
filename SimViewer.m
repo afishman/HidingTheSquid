@@ -3,10 +3,14 @@ classdef SimViewer < handle
         Sim;
         States;
         RawData;
+        
+        %In seconds, how often to take a line of data
+        Resolution = 0.0001;
     end
     
     methods
-        function this = SimViewer(name)
+        %Pass in the name of sim, not the path
+        function this = SimViewer(name, varargin)
             this.States = [];
             
             %Filename
@@ -17,15 +21,22 @@ classdef SimViewer < handle
             
             
             simStruct = load(SimulateThread.SimObjectFilename(name), SimulateThread.ObjectName);
-            this.Sim = simStruct.SimulateThread;
+            eval(strcat(['this.Sim = simStruct.', SimulateThread.ObjectName]));
             
             if(~exist(SimulateThread.CSVFilename(name), 'file'))
                 error(strcat([SimulateThread.CSVFilename(name), ' does not exist']));
             end
             
+            if nargin == 2
+                this.Resolution = resolution;
+            end
+            
             this.LoadCSV;
+            
+            
         end
         
+        %TODO: Dont think this actually works
         function AnimateSim(this)
             close all;
             
@@ -157,6 +168,12 @@ classdef SimViewer < handle
             title('Source');
         end
         
+        function PlotEventsFunValue(this)
+            this.PlotByKey(@(x) x.Source, this.Sim.Thread.Electrodes);
+            ylabel('Source');
+            title('Source');
+        end
+        
         %plot by key upon the list
         function PlotByKey(this, key, list)
             time = this.Times;
@@ -174,8 +191,6 @@ classdef SimViewer < handle
         end
         
         function LoadCSV(this)
-            %TODO: This should probably be a class variable
-            takeLinePeriod = 0.01;
             
             id = fopen(this.Sim.CSVFilename(this.Sim.Name), 'r');
             
@@ -209,7 +224,7 @@ classdef SimViewer < handle
                     %Get the data, take everything below t=0
                     %TODO: This is silly, there should be a time indepndant
                     %solution here
-                    if (line~=-1) & ((takeLineSum>takeLinePeriod) | line(1)<=0)
+                    if (line~=-1) & ((takeLineSum>this.Resolution) | line(1)<=0)
                         this.RawData = [this.RawData; line];
                         
                         this.SaveState(line);
@@ -272,5 +287,21 @@ classdef SimViewer < handle
                 line = str2num(tline);
             end
         end
+        
+        function maxDisplacements = MaxDisplacements(this)
+            displacements = [];
+            
+            for state = this.States
+                state.SetState;
+                
+                displacements = [displacements; ...
+                    arrayfun(@(x) x.Displacement, this.Sim.Thread.Vertices)];
+                
+            end
+            
+            maxDisplacements = max(displacements);
+        end
+        
     end
+    
 end

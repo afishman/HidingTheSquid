@@ -10,7 +10,7 @@ classdef LocalAlwaysOffModel < SwitchingModelLocal
         end
         
         function state = DeactivationRule(this, electrode)
-            state = false;
+            state = true;
         end
         
         function value = EventsFunValue(this, electrode)

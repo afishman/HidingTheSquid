@@ -1,6 +1,5 @@
 classdef Thread < handle
-    %THREAD Summary of this class goes here
-    %   Detailed explanation goes here
+    %THREADs model a length of DE with a set of electrodes.
     
     properties   
         %Thread Properties
@@ -10,7 +9,6 @@ classdef Thread < handle
         %was res
         Resolution = 50e-3;         %Resolution: natural length of a block * preStretch (m)
 
-        %TODO: Natural width
         MaterialProperties = Material_Properties.Default;
         
         %Should be a- constructor of Material_model
@@ -22,7 +20,7 @@ classdef Thread < handle
         RCCircuit = RCCircuit.Default;
         
         %Local sensing rules for each electrode
-        SwitchingModelLocal  = StepModel(0,0); 
+        SwitchingModelLocal  = StepModel(0,1); 
         SwitchingModelExternal = ExternalAlwaysOffModel(); 
         
         %%TODO: Pair element with model in a tidier way
@@ -35,8 +33,9 @@ classdef Thread < handle
         %DissertationElement used here as a stub since matlab does not
         %allow empty abstrat classes. Any class that inherits from Element
         %can live in these arrays
-        Elements = DissertationElement.empty;
-        ElectrodedElements = DissertationElement.empty;
+        Elements = StubElement.empty;
+        ElectrodedElements = StubElement.empty;
+        ElementConstructor = @DissertationElement;
     end
     
     methods
@@ -55,10 +54,7 @@ classdef Thread < handle
             %configuration
             naturalLength = this.Resolution / this.PreStretch;
             
-            %TODO: Refactor this when other models are considered
-            naturalWidth = naturalLength;
             
-            %TODO: This should probably come from materia
             
             nElements = round(this.StretchedLength / this.Resolution);
             this.Vertices(1) = Vertex(0, 0, 0);
@@ -68,11 +64,10 @@ classdef Thread < handle
                 this.Vertices(i+1) = Vertex(origin, 0, 0);
                 
                 %Only need to edit this line to change the element type
-                this.Elements(i) = DissertationElement(this.Vertices(i), ...
+                this.Elements(i) = this.ElementConstructor(this.Vertices(i), ...
                     this.Vertices(i+1), ...
                     preStretch, ...
                     naturalLength, ...
-                    naturalWidth, ...
                     this.InternalStressModel, ...
                     this.MaterialProperties);
             end
@@ -378,43 +373,6 @@ classdef Thread < handle
     end
     
     methods(Static)
-        %As derived in the paper
-        %TODO: test and finish or throw away
-        function this = ConstructOptimallySpacedThread(...
-                cellLengthAtPrestretch, ...
-                nCells, ...
-                activatedCellStretch, ...
-                passiveMembraneStretch, ...
-                electrodeType)
-
-            
-            preStretch = sqrt(activatedCellStretch*passiveMembraneStretch);
-            
-            d_C = cellLengthAtPrestretch / preStretch;
-            d_P = d_C * ...
-                ( nCells / (nCells - 1) ) * ...
-                ( (preStretch - cellLengthAtPrestretch) / (preStretch - passiveMembraneStretch) );
-            
-            spacingAtPreStretch = d_P * preStretch;
-            
-            stretchedLength = cellLengthAtPrestretch*nCells + (nCells / (nCells-1)) * spacingAtPreStretch;
-           
-            
-            %Two coarsest resolution is the greatest common divisor of
-            %cellLength and spacing
-            gcdAccuracy = 10^2 / Utils.Order(Utils.Tolerance); %Two orders above tolerance should do it!
-            resolution = gcd(floor(gcdAccuracy*cellLengthAtPrestretch), floor(gcdAccuracy*spacingAtPreStretch)) / gcdAccuracy;
-            
-            %show output and pause
-            clc;
-            fprintf('Constructing thread:\n  PreStretch: %s\n  Resolution: %s', preStretch, resolution);
-            pause(1);
-            
-            %Construct the thread
-            this = Thread(stretchedLength, resolution, preStretch);
-            this.FillWithElectrodes(this.StartVertex, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);
-        end
-        
         %initialises a thread with equally spaced, locally controlled electrodes
         function this = ConstructThreadWithSpacedElectrodes( ...
                 preStretch, ...

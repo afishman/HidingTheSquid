@@ -1,6 +1,6 @@
 classdef Gent_Model < handle
-    %MATERIALPROPERTIES Summary of this class goes here
-    %   Detailed explanation goes here
+    %Gent_Model defines the internal stress response of
+    %DE.
     
     properties
         %Material Model (Gent) Parameters

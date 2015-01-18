@@ -20,6 +20,12 @@ classdef FiberConstrainedElement < Element
         
         function capDot = CapacitanceDot(this)
         end
+        
+        function stress = Stress(this)
+        end
+        
+        end
+        
     end
     
 end

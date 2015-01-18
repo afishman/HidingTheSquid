@@ -4,14 +4,23 @@ classdef Gent_Model < handle
     
     properties
         %Material Model (Gent) Parameters
-        MuA=25000;
+        
+%MuA=25000;
         MuB=70000;
-        Ja=90;
+        %Ja=90;
         Jb=30;
         Tau=0.01;
     end
     
     methods
+        function ja = Ja(this)
+            ja = 90;
+        end
+        
+        function muA = MuA(this)
+            muA = 25000;
+        end
+        
         %TODO: A default / parameterised constructor
         function this = Gent_Model()
             %TODO checks for non-zero and such

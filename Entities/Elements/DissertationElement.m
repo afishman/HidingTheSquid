@@ -31,5 +31,6 @@ classdef DissertationElement < Element
         function naturalWidth = NaturalWidth(this)
             naturalWidth = this.NaturalLength;
         end
+        
     end
 end

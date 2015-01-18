@@ -14,7 +14,7 @@ classdef Thread < handle
         %Should be a- constructor of Material_model
         %TODO: Add a check for this
         %TODO: Add a default gent model
-        InternalStressModel = Gent_Model();
+        InternalStressModel = Gent_ModelFiberConstrained(3.5);
         
         %The rc circuit used for each electrode
         RCCircuit = RCCircuit.Default;

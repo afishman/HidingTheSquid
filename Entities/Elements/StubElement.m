@@ -29,5 +29,13 @@ classdef StubElement < Element
         function naturalWidth = NaturalWidth(this)
             naturalWidth = 0;
         end
+        
+        function stress = MaterialStress(this)
+            stress = 0;
+        end
+        
+        function dXi = DXi(this)
+            dXi = 0;
+        end
     end
 end

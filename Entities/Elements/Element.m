@@ -21,11 +21,16 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         
         PreStretch;
         
-        %Should be a Gent_Model
-        InternalStressModel;
         MaterialProperties;
         
         NaturalLength;
+        
+        %TODO: This should probably be in an object, but whatevs
+        MuA=25000;
+        MuB=70000;
+        Ja=90;
+        Jb=30;
+        Tau=0.01;
     end
     
     methods
@@ -35,13 +40,8 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 endVertex, ...
                 preStretch, ...
                 naturalLength, ...
-                internalStressModel, ...
                 materialProperties)
             
-            %TODO: Add a check that the model is a gent
-            if(isempty(internalStressModel))
-                error('No model given to Element constructor')
-            end
             
             if(isempty(materialProperties))
                 error('No material properties given to Element constructor');
@@ -59,7 +59,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 error('naturalLength must be > 0')
             end
             
-            this.InternalStressModel = internalStressModel;
             this.MaterialProperties = materialProperties;
             
             %set connections
@@ -121,10 +120,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             stress =  this.ElectricalStress - this.MaterialStress;
         end
         
-        function stress = MaterialStress(this)
-            stress = this.InternalStressModel.Stress(this.StretchRatio, this.Xi);
-        end
-        
         function stress = ElectricalStress(this)
             stress = this.MaterialProperties.RelativeDielectricConstant * this.Voltage.^2 / this.Thickness.^2;
         end
@@ -143,18 +138,23 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 dVoltage = (switchClosed*Vs  - V*(1 + R*CDot)) / (R*C);
             end
         end
-        
-        function dXi = DXi(this)
-            dXi = this.InternalStressModel.DXi(this.StretchRatio, this.Xi);
+       
+        function eta = Eta(this)
+            eta = 6 * this.Tau * this.MuB;
         end
+        
     end
     
     %I think this is what will need to be changed when extending the model
     methods (Abstract)
+        
+        
         capacitance = Capacitance(this);
         width = Width(this);
         naturalWidth = NaturalWidth(this);
         capDot = CapacitanceDot(this);
+        
+        stress = MaterialStress(this);
+        dXi = DXi(this);
     end
-    
 end

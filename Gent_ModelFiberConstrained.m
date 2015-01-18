@@ -28,30 +28,7 @@ classdef Gent_ModelFiberConstrained < Gent_Model
             eta = 6 * this.Tau * this.MuB;
         end
         
-        function stress = Stress(this, lambda, xi)
-            lambda1Pre = this.Lambda1Pre;
-            prodm2 = (lambda*lambda1Pre).^-2; %This comes up alot
-            
-            netA = this.MuA*(lambda.^2 - prodm2) ./ ...
-                (1 - (lambda.^2 + lambda1Pre.^2 + prodm2)./this.Ja);
-            
-            
-            netB = this.MuB.*(lambda^2*xi^-2 - lambda^-2*xi^2) ./ ...
-                (1 - (lambda^2*xi^-2 + lambda^-2*xi*2 - 2)/this.Jb);
-            
-            
-            %The total stress
-            stress = netA + netB;
-        end
-        
-        function dXi = DXi(this, lambda, xi)
-            product = (lambda/xi).^2; %this comes up alot
-            
-            dXi = this.MuB * (product + 0.5/product + 0.5) ./ ...
-                (1 - (product + 1/product - 2)./this.Jb);
-            
-            dXi = dXi / (3*this.Eta);
-        end
+
     end
     
 end

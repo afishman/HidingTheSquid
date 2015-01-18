@@ -18,32 +18,27 @@ classdef Thread < handle
         SwitchingModelLocal  = StepModel(0,1); 
         SwitchingModelExternal = ExternalAlwaysOffModel(); 
         
-        %%TODO: Pair element with model in a tidier way
-        %by default a rested element (lambda=xi)
-        %ElementConstructor = @(x)Element(x,x,this.InternalStressModel);
-        
         Vertices = Vertex.empty;
         Electrodes = Electrode.empty;
         
+        %NOTE: Only need to adjust ElementConstructor to choose the element subclass
         %DissertationElement used here as a stub since matlab does not
-        %allow empty abstrat classes. Any class that inherits from Element
-        %can live in these arrays
-        Elements = StubElement.empty;
-        ElectrodedElements = StubElement.empty;
-        ElementConstructor = @(startVert, endVert, preStretch, natLength, matProps) ...
-                FiberConstrainedElement(startVert, endVert, preStretch, natLength, matProps, 2.5);
+        %allow empty abstrat classes.
+        ElementConstructor = @FiberConstrainedElement;
+        Elements = DissertationElement.empty;
+        ElectrodedElements = DissertationElement.empty;
         
-        %ElementConstructor = @DissertationElement;
-
     end
     
     methods
         %TODO: ensure properties are nonzero, not an empty constructor
         %Initilises to a prestretched thread at rest
-        function this = Thread(stretchedLength, resolution, preStretch)
+        function this = Thread(stretchedLength, resolution, preStretch, elementConstructor)
+            
             this.StretchedLength = stretchedLength;
             this.PreStretch = preStretch;
             this.Resolution = resolution;
+            this.ElementConstructor = elementConstructor;
             
             if(~Utils.IsApproxMultipleOf(this.Resolution, this.StretchedLength))
                 error('stretched length is not divisible by resolution: \nstretched length %d, \nresolution: %d', this.StretchedLength, this.Resolution); 
@@ -63,7 +58,8 @@ classdef Thread < handle
                 this.Vertices(i+1) = Vertex(origin, 0, 0);
                 
                 %Only need to edit this line to change the element type
-                this.Elements(i) = this.ElementConstructor(this.Vertices(i), ...
+                this.Elements(i) = this.ElementConstructor(...
+                    this.Vertices(i), ...
                     this.Vertices(i+1), ...
                     preStretch, ...
                     naturalLength, ...
@@ -418,6 +414,7 @@ classdef Thread < handle
     
     methods(Static)
         %initialises a thread with equally spaced, locally controlled electrodes
+        %The start electrode is an externally controlled cell
         function this = ConstructThreadWithSpacedElectrodes( ...
                 preStretch, ...
                 cellLengthAtPrestretch, ...
@@ -425,18 +422,25 @@ classdef Thread < handle
                 spacingAtPreStretch, ...
                 switchingModelLocal, ...
                 switchingModelExternal, ...
-                rcCircuit)
+                rcCircuit, ...
+                varargin) %optionally the elment type
         
+            if(nargin == 8)
+                elementConstructor = varargin{1};
+            else
+                elementConstructor = @FiberConstrainedElement;
+            end
+            
             %Two coarsest resolution is the greatest common divisor of
             %cellLength and spacing
             gcdAccuracy = 10^2 * 10^(-Utils.Order(Utils.Tolerance)); %Two orders above tolerance should do it!
             resolution = gcd(floor(gcdAccuracy*cellLengthAtPrestretch), floor(gcdAccuracy*spacingAtPreStretch)) / gcdAccuracy;
             
             clc; fprintf('Coarsest resolution calculated to be: %dm', resolution);
-            pause(3);
+            pause(0.4);
             
             stretchedLength = cellLengthAtPrestretch*nCells + (nCells-1) * spacingAtPreStretch;
-            this = Thread(stretchedLength, resolution, preStretch);
+            this = Thread(stretchedLength, resolution, preStretch, elementConstructor);
             
             this.SwitchingModelLocal = switchingModelLocal;
             this.SwitchingModelExternal = switchingModelExternal;
@@ -445,6 +449,7 @@ classdef Thread < handle
             
             electrodeType = ElectrodeTypeEnum.LocallyControlled;
             this.FillWithElectrodes(this.StartVertex.Origin, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);
+            this.StartElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;
         end
         
         

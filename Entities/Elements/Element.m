@@ -25,19 +25,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         
         NaturalLength;
         
-        %TODO: This should probably be in an object, but whatevs
-%         MuA=25000;
-%         MuB=70000;
-%         Ja=90;
-%         Jb=30;
-%         Tau=0.01;
-
-        MuA=18000;
-        MuB=42000;
-        Ja=110;
-        Jb=55;
-        Tau=0.003;
-
+        GentParams;
     end
     
     methods
@@ -82,6 +70,8 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             this.Voltage = 0;
             
             this.NaturalLength = naturalLength;
+            
+            this.GentParams = this.DefaultGentParams;
         end
         
         function thickness = NaturalThickness(this)
@@ -94,9 +84,9 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         
             %TODO: put these limits in a better place
             if(lambda > 6)
-                error('Limiting stretch reached');
+                %error('Limiting stretch reached');
             elseif(lambda < 0.8)
-                error('compression')
+                %error('compression')
             end
         end
         
@@ -154,7 +144,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         end
        
         function eta = Eta(this)
-            eta = this.Tau * this.MuB;
+            eta = this.GentParams.Tau * this.GentParams.MuB;
         end
         
         %TODO HACK: There should be better way to do this
@@ -167,19 +157,16 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     
     %I think this is what will need to be changed when extending the model
     methods (Abstract)
-        
-        
         capacitance = Capacitance(this);
         width = Width(this);
         naturalWidth = NaturalWidth(this);
         capDot = CapacitanceDot(this);
-        
-
+        params = DefaultGentParams(this);
     end
     
     methods (Static, Abstract)
-        stress = MaterialStress(this);
-        dXi = DXi(this);
+        stress = MaterialStress(this, gentParams);
+        dXi = DXi(this, gentParams);
     end
     
     methods(Static)

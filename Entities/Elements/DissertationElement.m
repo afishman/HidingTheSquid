@@ -36,13 +36,18 @@ classdef DissertationElement < Element
             lambda = this.StretchRatio;
             xi = this.Xi;
             
+            muA = this.GentParams.MuA;
+            muB = this.GentParams.MuB;
+            ja = this.GentParams.Ja;
+            jb = this.GentParams.Jb;
+            
             %Network A
-            netA = (this.MuA * (lambda.^2 - lambda.^-4)) / ...
-                   (1 - (2*lambda.^2 + lambda.^-4 - 3)./ this.Ja);
+            netA = (muA * (lambda.^2 - lambda.^-4)) / ...
+                   (1 - (2*lambda.^2 + lambda.^-4 - 3)./ ja);
 
             %Network B
-            netB = (this.MuB * (lambda.^2 .* xi.^-2 - lambda.^-4 .* xi.^4)) / ...
-                   (1 - (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3) ./ this.Jb);
+            netB = (muB * (lambda.^2 .* xi.^-2 - lambda.^-4 .* xi.^4)) / ...
+                   (1 - (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3) ./ jb);
             
             %The total stress
             stress = netA + netB;
@@ -53,14 +58,29 @@ classdef DissertationElement < Element
             lambda = this.StretchRatio;
             xi = this.Xi;
             
-            dXi = (this.MuB * this.Jb * xi .* (lambda.^-4 .* xi.^4 - lambda.^2 .* xi.^-2)) ...
-                / (this.Eta * (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3 - this.Jb));
+            muB = this.GentParams.MuA;
+            jB = this.GentParams.MuB;
+            
+            dXi = (muB * jB* xi .* (lambda.^-4 .* xi.^4 - lambda.^2 .* xi.^-2)) ...
+                / (6 * this.Eta * (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3 - jB));
         end
         
+        function gentParams = DefaultGentParams(this)
+           muA=25000;
+           muB=70000;
+           ja=90;
+           jb=30;
+           tau=0.01;
+            
+           gentParams = GentParams(muA, muB, ja, jb, tau);
+        end
     end
     
     methods (Static)
-       function Demo(varargin)
+
+        
+        
+        function Demo(varargin)
             element = DissertationElement(0, 0, 1, 1, Material_Properties.Default);
             Element.Demo(element);
         end

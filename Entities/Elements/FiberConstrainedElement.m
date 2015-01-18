@@ -13,16 +13,12 @@ classdef FiberConstrainedElement < Element
                 endVertex, ...
                 preStretch, ...
                 naturalLength, ...
-                materialProperties, ...
-                lambda2Pre)
-            
-            if(lambda2Pre < 0 )
-                error('lambda 2 pre must be > 0 !')
-            end
+                materialProperties)
             
             this@Element(startVertex, endVertex, preStretch, naturalLength, materialProperties);
             
-            this.Lambda2Pre = lambda2Pre;
+            %TODO: adjust?
+            this.Lambda2Pre = this.PreStretch;
         end
         
         
@@ -47,18 +43,22 @@ classdef FiberConstrainedElement < Element
             lambda = this.StretchRatio;
             xi = this.Xi;
             
+            muA = this.GentParams.MuA;
+            muB = this.GentParams.MuB;
+            ja = this.GentParams.Ja;
+            jb = this.GentParams.Jb;
+            
             lambda2Pre = this.Lambda2Pre;
             prodm2 = (lambda*lambda2Pre).^-2; %This comes up alot
             
             
-            netA = this.MuA*(lambda.^2 - prodm2) ./ ...
-                (1 - (lambda.^2 + lambda2Pre.^2 + prodm2)./this.Ja);
+            netA = muA*(lambda.^2 - prodm2) ./ ...
+                (1 - (lambda.^2 + lambda2Pre.^2 + prodm2)./ja);
             
             
-            netB = this.MuB.*(lambda^2*xi^-2 - lambda^-2*xi^2) ./ ...
-                (1 - (lambda^2*xi^-2 + lambda^-2*xi^2 - 2)/this.Jb);
-            
-            
+            netB = muB.*(lambda^2*xi^-2 - lambda^-2*xi^2) ./ ...
+                (1 - (lambda^2*xi^-2 + lambda^-2*xi^2 - 2)/jb);
+
             %The total stress
             stress = (netA + netB);
         end
@@ -69,16 +69,28 @@ classdef FiberConstrainedElement < Element
             
             product = (lambda/xi).^2; %this comes up alot
             
-            dXi = this.MuB * (product - 0.5/product - 0.5) ./ ...
-                (1 - (product + 1/product - 2)./this.Jb);
+            muB = this.GentParams.MuB;
+            jb = this.GentParams.Jb;
+            
+            dXi = muB * (product - 0.5/product - 0.5) ./ ...
+                (1 - (product + 1/product - 2)./jb);
             
             dXi = dXi / (3*this.Eta);
         end
         
+        function gentParams = DefaultGentParams(this)
+            muA=18000;
+            muB=42000;
+            ja=110;
+            jb=55;
+            tau=0.003;
         
+            gentParams = GentParams(muA, muB, ja, jb, tau);
+        end
     end
     
     methods (Static)
+        
         
         function Demo(varargin)
             if(nargin==1)
@@ -87,10 +99,11 @@ classdef FiberConstrainedElement < Element
                 prestretch = 1;
             end
             
-            element = FiberConstrainedElement(0, 0, prestretch, 1, Material_Properties.Default, prestretch);
+            element = FiberConstrainedElement(0, 0, prestretch, 1, Material_Properties.Default);
 
             Element.Demo(element);
         end
+       
         
     end
 end

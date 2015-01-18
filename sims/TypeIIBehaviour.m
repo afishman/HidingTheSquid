@@ -29,9 +29,6 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 switchingModelExternal, ...
                 rcCircuit);
             
-%Set the first electrode to be externally controlled
-thread.StartElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;
-
 %Uncomment this to plot the thread! (it is currently in prestretch config)
 % showNodes = true;
 % sim.Thread.Plot(showNodes);

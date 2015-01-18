@@ -9,7 +9,7 @@ electrodeType = ElectrodeTypeEnum.LocallyControlled;
 %Define the switching models
 rOn = 2.2; rOff = 4.7;
 switchingModelLocal = TypeIModel(rOn, rOff);
-switchingModelLocal = LocalAlwaysOffModel;
+%switchingModelLocal = LocalAlwaysOffModel;
 
 timeOn = 0; timeOff = 6;
 switchingModelExternal = StepModel(timeOn, timeOff);
@@ -29,11 +29,9 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 spacingAtPrestretch, ...
                 switchingModelLocal, ...
                 switchingModelExternal, ...
-                rcCircuit);
+                rcCircuit, ...
+                @DissertationElement);
             
-%Set the first electrode to be externally controlled
-thread.StartElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;
-thread.StartElectrode.NextElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;
 %Uncomment this to plot the thread! (it is currently in prestretch config)
 % showNodes = true;
 % sim.Thread.Plot(showNodes);

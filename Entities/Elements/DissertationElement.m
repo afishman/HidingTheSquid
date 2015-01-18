@@ -58,4 +58,13 @@ classdef DissertationElement < Element
         end
         
     end
+    
+    methods (Static)
+       function Demo(varargin)
+            element = DissertationElement(0, 0, 1, 1, Material_Properties.Default);
+            Element.Demo(element);
+        end
+        
+        
+    end
 end

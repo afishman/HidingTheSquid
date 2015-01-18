@@ -30,7 +30,11 @@ classdef Thread < handle
         %can live in these arrays
         Elements = StubElement.empty;
         ElectrodedElements = StubElement.empty;
-        ElementConstructor = @DissertationElement;
+        ElementConstructor = @(startVert, endVert, preStretch, natLength, matProps) ...
+                FiberConstrainedElement(startVert, endVert, preStretch, natLength, matProps, 2.5);
+        
+    %DissertationElement(startVert, endVert, preStretch, natLength, matProps);
+
     end
     
     methods
@@ -73,7 +77,7 @@ classdef Thread < handle
         
         %TODO: refactor into element
         function l = NaturalLength(this)
-            l = this.Resolution / this.PreStretch;
+            l = sum(arrayfun(@(x) x.NaturalLength, this.Elements)) ;
         end
         
         %plot the thread
@@ -364,6 +368,19 @@ classdef Thread < handle
             orderedElectrodes(end).NextElectrode = [];
         end
         
+        %as derived in the paper
+        function CalculateDrivingVoltage(this)
+            a = length(this.ElectrodedElements);
+            b = length(this.Elements) - a;
+            
+            c = round(this.NaturalLength / this.StartElement.NaturalLength - a);
+        end
+        
+        function element = StartElement(this)
+            element = this.StartVertex.RightElement;
+        end
+        
+        %TODO: StartElem
     end
     
     methods(Static)
@@ -396,5 +413,7 @@ classdef Thread < handle
             electrodeType = ElectrodeTypeEnum.LocallyControlled;
             this.FillWithElectrodes(this.StartVertex.Origin, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);
         end
+        
+        
     end
 end

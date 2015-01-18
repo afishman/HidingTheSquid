@@ -7,7 +7,7 @@ spacingAtPrestretch = 80e-3 * preStretch;
 electrodeType = ElectrodeTypeEnum.LocallyControlled;
 
 %Define the switching models
-rOn = 2; rOff = 4.8;
+rOn = 2.2; rOff = 4.7;
 switchingModelLocal = TypeIModel(rOn, rOff);
 
 timeOn = 0; timeOff = 6;
@@ -15,8 +15,8 @@ switchingModelExternal = StepModel(timeOn, timeOff);
 
 %NOTE: RCCircuit.Default could have been used here, This is for
 %illustrative purposes
-resistance = 200;
-sourceVoltage = 3459.5;
+resistance = 500;
+sourceVoltage = 4000;
 rcCircuit = RCCircuit(resistance, sourceVoltage);
 
 %initialises a thread with equally spaced, locally controlled electrodes

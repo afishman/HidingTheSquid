@@ -15,7 +15,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         RCCircuit = []; %Should be set by the electrode
     end
     
-    properties (SetAccess = private)
+    properties % (SetAccess = private)
         StartVertex;
         EndVertex;
         
@@ -26,11 +26,18 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         NaturalLength;
         
         %TODO: This should probably be in an object, but whatevs
-        MuA=25000;
-        MuB=70000;
-        Ja=90;
-        Jb=30;
-        Tau=0.01;
+%         MuA=25000;
+%         MuB=70000;
+%         Ja=90;
+%         Jb=30;
+%         Tau=0.01;
+
+        MuA=18000;
+        MuB=42000;
+        Ja=110;
+        Jb=55;
+        Tau=0.003;
+
     end
     
     methods
@@ -84,6 +91,13 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         %Lambda is the stretch ratio (in length)
         function lambda = StretchRatio(this)
             lambda = this.PreStretch + (this.EndVertex.Displacement - this.StartVertex.Displacement)/this.NaturalLength;
+        
+            %TODO: put these limits in a better place
+            if(lambda > 6)
+                error('Limiting stretch reached');
+            elseif(lambda < 0.8)
+                error('compression')
+            end
         end
         
         function lambdaDot = StretchVelocity(this)
@@ -140,7 +154,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         end
        
         function eta = Eta(this)
-            eta = 6 * this.Tau * this.MuB;
+            eta = this.Tau * this.MuB;
         end
         
     end
@@ -156,5 +170,66 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         
         stress = MaterialStress(this);
         dXi = DXi(this);
+    end
+    
+    methods(Static)
+       function Demo(element)
+            nPts = 100;
+            lambdas = linspace(0.8,7,nPts);
+            xis = linspace(0.8,7,nPts);
+            
+            element.NaturalLength = 1;
+            element.StartVertex = Vertex(0,0,0);
+            element.EndVertex = Vertex(1,0,0);
+            
+            stresses = [];
+            actualStretches = [];
+            
+            for lambda = lambdas
+                element.EndVertex.Displacement = lambda - 1;
+                element.Xi = element.StretchRatio;
+                stresses(end+1) = element.Stress;
+                actualStretches(end+1) = element.StretchRatio;
+            end
+            
+            plot(actualStretches, stresses);
+            xlim([0.5, max(lambdas)]);
+            grid on
+            xlabel('stretch ratio')
+            ylabel('stress')
+            title(class(element))
+            
+            
+            
+            
+            lambdaXiImage = [];
+            i = 0;
+            for lambda = lambdas
+                i = i+1;
+                
+                j = 0;
+                for xi = xis
+                    j = j+1;
+                    
+                    element.EndVertex.Displacement = lambda - 1;
+                    element.Xi = element.StretchRatio;
+                    lambdaXiImage(i,j) = element.Stress;
+                end
+            end
+            
+            figure
+            imagesc(lambdas, xis, lambdaXiImage)
+            colorbar
+            xlim([0.5, max(lambdas)]);
+            grid on
+            xlabel('stretch ratio')
+            ylabel('xi')
+            title(class(element))
+       end
+        
+       function CorrectVoltage()
+         
+       end
+       
     end
 end

@@ -150,6 +150,24 @@ classdef SimViewer < handle
             title('Voltage');
         end
         
+        function PlotStress(this)
+            this.PlotByKey(@(x) x.Stress, this.Sim.Thread.Elements);
+            ylabel('Stress (pa)');
+            title('Stress');
+        end
+        
+        function PlotXi(this)
+            this.PlotByKey(@(x) x.Xi, this.Sim.Thread.Elements);
+            ylabel('Xi (pa)');
+            title('Xi');
+        end
+        
+        function PlotNodeForces(this)
+            this.PlotByKey(@(x) x.Force, this.Sim.Thread.Vertices);
+            ylabel('Forces (N)');
+            title('Node Forces');
+        end
+        
         function PlotDVoltage(this)
             this.PlotByKey(@(x) x.DVoltage, this.Sim.Thread.Electrodes);
             ylabel('Voltage (V)');

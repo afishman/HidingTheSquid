@@ -157,6 +157,12 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             eta = this.Tau * this.MuB;
         end
         
+        %TODO HACK: There should be better way to do this
+        function SetStretchRatio(this, stretchRatio)
+            this.StartVertex.Displacement = 0;
+            stretchDisplacement = stretchRatio - this.PreStretch;
+            this.EndVertex.Displacement = stretchDisplacement * this.NaturalLength;
+        end
     end
     
     %I think this is what will need to be changed when extending the model
@@ -168,11 +174,16 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         naturalWidth = NaturalWidth(this);
         capDot = CapacitanceDot(this);
         
+
+    end
+    
+    methods (Static, Abstract)
         stress = MaterialStress(this);
         dXi = DXi(this);
     end
     
     methods(Static)
+        
        function Demo(element)
             nPts = 100;
             lambdas = linspace(0.8,7,nPts);
@@ -226,10 +237,5 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             ylabel('xi')
             title(class(element))
        end
-        
-       function CorrectVoltage()
-         
-       end
-       
     end
 end

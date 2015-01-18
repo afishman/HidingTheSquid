@@ -33,7 +33,7 @@ classdef Thread < handle
         ElementConstructor = @(startVert, endVert, preStretch, natLength, matProps) ...
                 FiberConstrainedElement(startVert, endVert, preStretch, natLength, matProps, 2.5);
         
-    %DissertationElement(startVert, endVert, preStretch, natLength, matProps);
+        %ElementConstructor = @DissertationElement;
 
     end
     
@@ -369,11 +369,44 @@ classdef Thread < handle
         end
         
         %as derived in the paper
+        %TODO: Cleanup the bodgy stress calculations
+        %WARNING: will cause side-effects on the thread reference!!!
         function CalculateDrivingVoltage(this)
             a = length(this.ElectrodedElements);
             b = length(this.Elements) - a;
             
+            %Just to make sure!
             c = round(this.NaturalLength / this.StartElement.NaturalLength - a);
+            
+            lambdaA = 5;
+            lambdaB = 1.25;
+            
+            element = this.StartElement;
+            
+            %active stress
+            element.SetStretchRatio(lambdaA);
+            element.Xi = lambdaA;
+            activeStress = element.MaterialStress;
+            activeFaceArea = element.LengthFaceArea;
+            
+            %passive stress
+            element.SetStretchRatio(lambdaB);
+            element.Xi = lambdaB;
+            passiveStress = element.MaterialStress;
+            passiveFaceArea = element.LengthFaceArea;
+            
+            voltages = linspace(100, 5000, 1000);
+            equationToSolve = [];
+            for voltage = voltages
+                element.SetStretchRatio(lambdaA);
+                element.Voltage = voltage;
+                electricalStress = element.ElectricalStress;
+                
+                equationToSolve(end+1) = (electricalStress - activeStress)*activeFaceArea + passiveStress*passiveFaceArea;
+            end
+            
+            plot(voltages, equationToSolve);
+            grid on
         end
         
         function element = StartElement(this)

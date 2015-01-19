@@ -161,6 +161,10 @@ classdef Thread < handle
                 error('give the electrode some length!');
             end
             
+            if ~isempty(this.Electrodes) && this.Electrodes(1).RCCircuit~=this.RCCircuit
+                error('the thread RCCircuit has changed, do not do this');
+            end
+            
             %Check that introducing this electrode would not cause an
             %overlap
             for electrode = this.Electrodes
@@ -170,6 +174,7 @@ classdef Thread < handle
                     error('cannot introduce an electrode that would cause an overlap')
                 end
             end
+            
             
             
             %Set previousElectrode. Find electrode with a startVertex
@@ -366,7 +371,6 @@ classdef Thread < handle
         
         %as derived in the paper
         %TODO: Cleanup the bodgy stress calculations
-        %WARNING: will cause side-effects on the thread reference!!!
         function CalculateDrivingVoltage(this)
             a = length(this.ElectrodedElements);
             b = length(this.Elements) - a;
@@ -374,10 +378,19 @@ classdef Thread < handle
             %Just to make sure!
             c = round(this.NaturalLength / this.StartElement.NaturalLength - a);
             
+            if(c~=a)
+                error('Somethong is off in the number of blocks equation. This should really be unit test.')
+            end
+            
             lambdaA = 5;
             lambdaB = 1.25;
             
-            element = this.StartElement;
+            element = this.ElementConstructor(...
+                    Vertex(0, 0, 0), ...
+                    Vertex(1, 0, 0), ...
+                    1, ...
+                    1, ...
+                    this.MaterialProperties);
             
             %active stress
             element.SetStretchRatio(lambdaA);
@@ -405,6 +418,11 @@ classdef Thread < handle
             grid on
         end
         
+        %The root of this equartion 
+        function a = DrivingVoltageEquation(this, lambdaA, lambdaB)
+            
+        end
+        
         function element = StartElement(this)
             element = this.StartVertex.RightElement;
         end
@@ -415,6 +433,7 @@ classdef Thread < handle
     methods(Static)
         %initialises a thread with equally spaced, locally controlled electrodes
         %The start electrode is an externally controlled cell
+        %uses the default rc circuit for the element
         function this = ConstructThreadWithSpacedElectrodes( ...
                 preStretch, ...
                 cellLengthAtPrestretch, ...
@@ -422,7 +441,6 @@ classdef Thread < handle
                 spacingAtPreStretch, ...
                 switchingModelLocal, ...
                 switchingModelExternal, ...
-                rcCircuit, ...
                 varargin) %optionally the elment type
         
             if(nargin == 8)
@@ -445,13 +463,12 @@ classdef Thread < handle
             this.SwitchingModelLocal = switchingModelLocal;
             this.SwitchingModelExternal = switchingModelExternal;
             
-            this.RCCircuit = rcCircuit;
+            %Default RC circuit used here
+            this.RCCircuit = this.StartElement.DefaultRCCircuit;
             
             electrodeType = ElectrodeTypeEnum.LocallyControlled;
             this.FillWithElectrodes(this.StartVertex.Origin, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);
             this.StartElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;
         end
-        
-        
     end
 end

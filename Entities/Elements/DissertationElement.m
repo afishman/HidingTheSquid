@@ -74,6 +74,10 @@ classdef DissertationElement < Element
             
            gentParams = GentParams(muA, muB, ja, jb, tau);
         end
+        
+        function rcCircuit = DefaultRCCircuit(this)
+            rcCircuit = RCCircuit(3459.5, 500);
+        end
     end
     
     methods (Static)

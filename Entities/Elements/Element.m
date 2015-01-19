@@ -1,5 +1,5 @@
 classdef Element < handle & matlab.mixin.Heterogeneous
-    %GENT_ELEMENT is a small bit of material with constant stretch ratio
+    %An ELEMENT is a small bit of material with constant stretch ratio
     %and internal properties
     %   This class is abstract to allow other 1D deformation models to be
     %   implemented. More abstraction could be done, but this is intended to
@@ -13,6 +13,11 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         Xi;
         Voltage;
         RCCircuit = []; %Should be set by the electrode
+    end
+    
+    %The default voltage is calculated as the optimal
+    properties (Constant)
+        DefaultResistance = 200; %In ohms
     end
     
     properties % (SetAccess = private)
@@ -162,6 +167,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         naturalWidth = NaturalWidth(this);
         capDot = CapacitanceDot(this);
         params = DefaultGentParams(this);
+        rcCircuit = DefaultRCCircuit(this);
     end
     
     methods (Static, Abstract)

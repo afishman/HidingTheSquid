@@ -87,6 +87,11 @@ classdef FiberConstrainedElement < Element
         
             gentParams = GentParams(muA, muB, ja, jb, tau);
         end
+        
+        function rcCircuit = DefaultRCCircuit(this, thread)
+            rcCircuit = RCCircuit(4500, 200);
+        end
+        
     end
     
     methods (Static)

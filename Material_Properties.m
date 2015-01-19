@@ -1,3 +1,4 @@
+%TODO: change to standard naming convention
 classdef Material_Properties < handle
     %Defaults here are for VHB4910
     

@@ -15,12 +15,6 @@ timeOn = 0; timeOff = 6;
 switchingModelExternal = StepModel(timeOn, timeOff);
 %switchingModelExternal = LocalAlwaysOffModel;
 
-%NOTE: RCCircuit.Default could have been used here, This is for
-%illustrative purposes
-resistance = 500;
-sourceVoltage = 4500;
-rcCircuit = RCCircuit(resistance, sourceVoltage);
-
 %initialises a thread with equally spaced, locally controlled electrodes
 thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 preStretch, ...

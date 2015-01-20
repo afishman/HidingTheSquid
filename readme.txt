@@ -49,13 +49,12 @@ Constructing Threads:
 ------------
 When you construct your thread, view it with Thread.Plot
 
-In general, use the static Thread.ConstructThreadWithSpacedElectrodes to construct your thread (the actual Thread constructor provides a more flexible way, but will require more work to make it sim ready). This makes a thread with equally spaced - locally controlled electrodes. (I tend to then set the Thread.StartElectrode.Type to an external type)
+In general, use the static Thread.ConstructThreadWithSpacedElectrodes to construct your thread (the actual Thread constructor provides a more flexible way, but will require more work to make it sim ready). This makes a thread with equally spaced, locally controlled electrodes, with the first electrode externally controlled
 
 WARNING: This tries to figure out the coarsest possible element length, so keep an ```I''' on it. If it messes up you might get one that is stupidly coarse 
 (though works as it should for the provided sims)
 
 Prior to constructing the thread you'll need to construct the following:
-- RCCircuit (just holds the source voltage and resistance params)
 - LocalSwitchingModel (for the self-sensing cells, look in the SwitchingModelsLocal folder)
 - ExternalSwitchingModel (look in the SwitchingModelsExternal folder, includes cyclic/step) *** now includes insightful static Demo methods ***
 - ... as well as arguments for the number of cells, prestretch, their dimensions and spacing
@@ -64,20 +63,22 @@ Prior to constructing the thread you'll need to construct the following:
 Adjusting Other model parameters:
 ------------
 I use defaults for the rest of the parameters. If you want to view/adjust these look in:
-- Gent_Model
+- Element subclasses
 - Material_Parameters (adjust the static Default method, which was a silly thing to implement)
 
 -----------------------
 Extending the model
 -----------------------
-You should make a class that inherits from Element and edit the ElementConstructor property in Thread.
+You should make a class that inherits from Element.
 
 I have tried to anticipate what will need to be changed for the new model in the the Abstract methods of Element:
--Capacitance
--CapacitanceDot (rate of capacirance)
--Width
--NaturalWidth
+- Capacitance
+- CapacitanceDot (rate of capacirance)
+- Width
+- NaturalWidth
+- GentParams Default
+- RCCircuit Default
 
-should think should work for at least the fiber constrained model.
+this works for at least the fiber constrained model.
 
 Feel free to abstract more away as necessary. There is also a git repo here, if that's your thing - go ahead and commit forth!

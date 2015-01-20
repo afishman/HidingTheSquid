@@ -443,7 +443,7 @@ classdef Thread < handle
                 switchingModelExternal, ...
                 varargin) %optionally the elment type
         
-            if(nargin == 8)
+            if(nargin == 7)
                 elementConstructor = varargin{1};
             else
                 elementConstructor = @FiberConstrainedElement;

@@ -88,8 +88,10 @@ classdef FiberConstrainedElement < Element
             gentParams = GentParams(muA, muB, ja, jb, tau);
         end
         
-        function rcCircuit = DefaultRCCircuit(this, thread)
-            rcCircuit = RCCircuit(200, 4500);
+        function rcCircuit = DefaultRCCircuit(this)
+            resistance = 200;
+            voltage = 4500;
+            rcCircuit = RCCircuit(resistance, voltage);
         end
         
     end

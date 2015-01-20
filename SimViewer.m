@@ -320,6 +320,25 @@ classdef SimViewer < handle
             maxDisplacements = max(displacements);
         end
         
+        %For debug really
+        function FFTOfFirstVertex(this)
+            positions = [];
+            for state = this.States
+                state.SetState;
+                
+                positions(end+1) = this.Sim.Thread.StartVertex.Next.Position;
+            end
+            
+            [freqs, amp] = Utils.FFT(this.Times, positions);
+            
+            freqs = freqs(2:end);
+            amp = amp(2:end);
+            
+            plot(freqs, amp);
+            xlabel('Frequency (Hz)');
+            ylabel('Amplitude');
+        end
+        
     end
     
 end

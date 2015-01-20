@@ -17,7 +17,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     
     %The default voltage is calculated as the optimal
     properties (Constant)
-        DefaultResistance = 200; %In ohms
+        DefaultResistance = 500; %In ohms
     end
     
     properties % (SetAccess = private)

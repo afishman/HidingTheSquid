@@ -76,7 +76,7 @@ classdef DissertationElement < Element
         end
         
         function rcCircuit = DefaultRCCircuit(this)
-            rcCircuit = RCCircuit(3459.5, 500);
+            rcCircuit = RCCircuit(500, 3459.5);
         end
     end
     

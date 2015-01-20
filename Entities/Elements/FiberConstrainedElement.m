@@ -89,7 +89,7 @@ classdef FiberConstrainedElement < Element
         end
         
         function rcCircuit = DefaultRCCircuit(this, thread)
-            rcCircuit = RCCircuit(4500, 200);
+            rcCircuit = RCCircuit(200, 4500);
         end
         
     end

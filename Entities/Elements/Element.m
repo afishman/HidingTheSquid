@@ -40,7 +40,8 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 endVertex, ...
                 preStretch, ...
                 naturalLength, ...
-                materialProperties)
+                materialProperties, ...
+                gentParams)
             
             
             if(isempty(materialProperties))
@@ -76,7 +77,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             
             this.NaturalLength = naturalLength;
             
-            this.GentParams = this.DefaultGentParams;
+            this.GentParams = gentParams;
         end
         
         function thickness = NaturalThickness(this)
@@ -166,7 +167,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         width = Width(this);
         naturalWidth = NaturalWidth(this);
         capDot = CapacitanceDot(this);
-        params = DefaultGentParams(this);
         rcCircuit = DefaultRCCircuit(this);
     end
     

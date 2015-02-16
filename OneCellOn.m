@@ -8,10 +8,10 @@ electrodeType = ElectrodeTypeEnum.LocallyControlled;
 
 %Define the switching models
 rOn = 2.2; rOff = 4.7;
-switchingModelLocal = TypeIModel(rOn, rOff);
-%switchingModelLocal = LocalAlwaysOffModel;
+%switchingModelLocal = TypeIModel(rOn, rOff);
+switchingModelLocal = LocalAlwaysOffModel;
 
-timeOn = 0; timeOff = 300;
+timeOn = 0; timeOff = 10;
 switchingModelExternal = StepModel(timeOn, timeOff);
 %switchingModelExternal = LocalAlwaysOffModel;
 
@@ -23,11 +23,7 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
     spacingAtPrestretch, ...
     switchingModelLocal, ...
     switchingModelExternal, ...
-    GentParams.Koh2012, ...
     @FiberConstrainedElement);
-return
-thread.RCCircuit.SourceVoltage = 5500;
-thread.RCCircuit.Resistance = 1e8;
 
 %Uncomment this to plot the thread! (it is currently in prestretch config)
 % showNodes = true;
@@ -36,7 +32,7 @@ thread.RCCircuit.Resistance = 1e8;
 %Make a simulator object and run for 7s
 simName = mfilename;
 sim = SimulateThread(simName, thread);
-sim.RunSim(timeOff*1.2);
+sim.RunSim(7);
 
 %View the output
 viewer = SimViewer(sim.Name);

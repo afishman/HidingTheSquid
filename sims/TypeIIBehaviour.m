@@ -13,12 +13,6 @@ switchingModelLocal = TypeIIModel(rOn, rOff);
 tEnd = 5.5; period = 1;
 switchingModelExternal = CyclicSwitchModel(tEnd, period);
 
-%NOTE: RCCircuit.Default could have been used here, This is for
-%illustrative purposes
-resistance = 200;
-sourceVoltage = 3459.5;
-rcCircuit = RCCircuit(resistance, sourceVoltage);
-
 %initialises a thread with equally spaced, locally controlled electrodes
 thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 preStretch, ...
@@ -26,7 +20,12 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 nCells, ...
                 spacingAtPrestretch, ...
                 switchingModelLocal, ...
-                switchingModelExternal);
+                switchingModelExternal, ...
+                GentParams.Koh2012, ...
+                @(x)FiberConstrainedElement(x, 1));
+ 
+% thread.RCCircuit.SourceVoltage = 5500;
+thread.RCCircuit.Resistance = 1e7;
             
 %Uncomment this to plot the thread! (it is currently in prestretch config)
 % showNodes = true;

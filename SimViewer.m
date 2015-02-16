@@ -5,7 +5,11 @@ classdef SimViewer < handle
         RawData;
         
         %In seconds, how often to take a line of data
-        Resolution = 0.0001;
+        Resolution = 1;
+        
+        ReportsFolder = '../reports/';
+        SaveToFolder = strcat([this.ReportsFolder, this.Sim.Name, '/']);
+            
     end
     
     methods
@@ -28,7 +32,7 @@ classdef SimViewer < handle
             end
             
             if nargin == 2
-                this.Resolution = resolution;
+                this.Resolution = varargin{1};
             end
             
             this.LoadCSV;
@@ -339,6 +343,30 @@ classdef SimViewer < handle
             ylabel('Amplitude');
         end
         
+        function GenReport(this)
+            this.SaveFigure(@this.PlotMaterial, 'material')
+            this.SaveFigure(@this.PlotGlobal, 'global_states')
+            this.SaveFigure(@this.PlotStretchRatio, 'stretch_ratio')
+            this.SaveFigure(@this.PlotVoltage, 'voltage')
+            this.SaveFigure(@this.PlotSource, 'source')
+           
+            save(strcat([this.SaveToFolder, this.Sim.Name, '.mat']), 'this');
+        end
+        
+        %f() is expected to yield a figure
+        function SaveFigure(this, f, name)
+            close all
+            figure
+            f();
+            format = 'png';
+            
+            if(~exist(saveToFolder, 'dir'))
+                mkdir(saveToFolder);
+            end
+            
+            reportPath = strcat([this.SaveToFolder, name, '.', format]);
+            saveas(gcf, reportPath, format);
+        end
     end
     
 end

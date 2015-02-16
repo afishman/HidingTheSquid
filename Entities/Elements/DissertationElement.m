@@ -9,9 +9,10 @@ classdef DissertationElement < Element
             endVertex, ...
             preStretch, ...
             naturalLength, ...
-            materialProperties)
+            materialProperties, ...
+            gentParams)
         
-            this@Element(startVertex, endVertex, preStretch, naturalLength, materialProperties);
+            this@Element(startVertex, endVertex, preStretch, naturalLength, materialProperties, gentParams);
         end
         
         function capacitance = Capacitance(this)
@@ -63,16 +64,6 @@ classdef DissertationElement < Element
             
             dXi = (muB * jB* xi .* (lambda.^-4 .* xi.^4 - lambda.^2 .* xi.^-2)) ...
                 / (6 * this.Eta * (2*lambda.^2 .* xi.^-2 + lambda.^-4 .* xi.^4 - 3 - jB));
-        end
-        
-        function gentParams = DefaultGentParams(this)
-           muA=25000;
-           muB=70000;
-           ja=90;
-           jb=30;
-           tau=0.01;
-            
-           gentParams = GentParams(muA, muB, ja, jb, tau);
         end
         
         function rcCircuit = DefaultRCCircuit(this)

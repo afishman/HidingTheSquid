@@ -13,12 +13,18 @@ classdef FiberConstrainedElement < Element
                 endVertex, ...
                 preStretch, ...
                 naturalLength, ...
-                materialProperties)
+                materialProperties, ...
+                gentParams, ...
+                preStretch2)
             
-            this@Element(startVertex, endVertex, preStretch, naturalLength, materialProperties);
+            this@Element(startVertex, endVertex, preStretch, naturalLength, materialProperties, gentParams);
             
-            %TODO: adjust?
-            this.Lambda2Pre = this.PreStretch;
+            if nargin > 7
+                this.Lambda2Pre = this.preStretch2;
+            else
+                this.Lambda2Pre = this.PreStretch;
+            end
+            
         end
         
         
@@ -77,20 +83,11 @@ classdef FiberConstrainedElement < Element
             
             dXi = dXi / (3*this.Eta);
         end
-        
-        function gentParams = DefaultGentParams(this)
-            muA=18000;
-            muB=42000;
-            ja=110;
-            jb=55;
-            tau=0.003;
-        
-            gentParams = GentParams(muA, muB, ja, jb, tau);
-        end
+       
         
         function rcCircuit = DefaultRCCircuit(this)
-            resistance = 200;
-            voltage = 4500;
+            resistance = 2000000;
+            voltage = 5600;
             rcCircuit = RCCircuit(resistance, voltage);
         end
         

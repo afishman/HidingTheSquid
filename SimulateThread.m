@@ -1,20 +1,8 @@
-%This object stores everthing needed to run a simulation.
-% - After construction use addElectrode, setElecManual setElecSelfSenser to
-% include electrodes and assign behaviour
-% - use plotSetup to check the discretisation
-%
-% - use runSim, or continueSim to run simulations. these save simulation
-% date to <obj.name>.txt and object info to <obj.name>.mat
-% - use extra post-simulation functions to plot results.
-
+%This object runs simulations.
 classdef SimulateThread < handle
     properties
         %%%Sim name, used for saving/loading
         Name='default';
-        
-       
-        %The threshold (defined w.r.t the strain source)
-        thresh=[0,0];      
         
         CurrentTime;
         

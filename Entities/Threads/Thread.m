@@ -26,7 +26,7 @@ classdef Thread < handle
         %allow empty abstrat classes.
         ElementConstructor = @FiberConstrainedElement;
         Elements = DissertationElement.empty;
-        ElectrodedElements = DissertationElement.empty;
+        %ElectrodedElements = DissertationElement.empty;
         
         GentParams;
     end
@@ -59,14 +59,21 @@ classdef Thread < handle
                 origin = this.Vertices(i).Origin + this.Resolution;
                 this.Vertices(i+1) = Vertex(origin, 0, 0);
                 
-                %Only need to edit this line to change the element type
-                this.Elements(i) = this.ElementConstructor(...
-                    this.Vertices(i), ...
+                initElementParams = ElementInitParams(this.Vertices(i), ...
                     this.Vertices(i+1), ...
                     preStretch, ...
                     naturalLength, ...
                     this.MaterialProperties, ...
                     this.GentParams);
+                
+                this.Elements(i) = this.ElementConstructor(initElementParams);
+            end
+        end
+        
+        function elements = ElectrodedElements(this)
+            elements=[];
+            for electrode = this.Electrodes
+                elements = [elements, electrode.Elements];
             end
         end
         
@@ -217,7 +224,7 @@ classdef Thread < handle
             newElectrode = Electrode(elements, type, this.RCCircuit, this.SwitchingModelLocal, this.SwitchingModelExternal);
             newElectrode.NextElectrode = nextElectrode;
             newElectrode.PreviousElectrode = previousElectrode;
-            this.ElectrodedElements = [this.ElectrodedElements, newElectrode.Elements];
+            %this.ElectrodedElements = [this.ElectrodedElements, newElectrode.Elements];
             this.Electrodes(end+1) = newElectrode;
             this.DefineElectrodeNeighbours;
         end
@@ -372,6 +379,64 @@ classdef Thread < handle
             orderedElectrodes(end).NextElectrode = [];
         end
         
+        function [activeStretch, passiveStretch] = CalculateSteadyStateStretches(this)
+            elementInitParams = ElementInitParams(...
+                    Vertex(0, 0, 0), ...
+                    Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
+                    this.PreStretch, ...
+                    this.StartElement.NaturalLength, ...
+                    this.MaterialProperties, ...
+                    this.GentParams);
+            elementActive = this.ElementConstructor(elementInitParams);
+            elementActive.Voltage = this.RCCircuit.SourceVoltage;
+            
+            elementInitParams = ElementInitParams(...
+                    Vertex(0, 0, 0), ...
+                    Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
+                    this.PreStretch, ...
+                    this.StartElement.NaturalLength, ...
+                    this.MaterialProperties, ...
+                    this.GentParams);
+            elementPassive = this.ElementConstructor(elementInitParams);
+         
+            
+%             guesses = linspace(3,6,100);
+%             vals = arrayfun(@(x)this.CalculateSteadyStateStretchesEqn(x, elementActive, elementPassive), guesses);
+%             
+%             close all
+%             plot(guesses, vals);
+            
+            initialGuess = 5;
+            activeStretch = fzero(@(x) this.CalculateSteadyStateStretchesEqn(x, elementActive, elementPassive), initialGuess);
+            passiveStretch = SteadyStatePassiveStretch(this, activeStretch);
+        end
+        
+        function x = CalculateSteadyStateStretchesEqn(this, activeStretch, elementActive, elementPassive)
+            %TODO: Dont assume the first vertex is at 0!
+            
+            elementActive.EndVertex.Displacement = elementActive.NaturalLength*(activeStretch - elementActive.PreStretch);
+            elementActive.Xi = activeStretch;
+            
+            passiveStretch = this.SteadyStatePassiveStretch(activeStretch);
+            elementPassive.EndVertex.Displacement = elementPassive.NaturalLength*(passiveStretch - elementPassive.PreStretch);
+            elementPassive.Xi = passiveStretch;
+            
+            
+            
+            x = elementActive.Force - elementPassive.Force;
+        end
+        
+        %assuming the material is split into two sections of equal stetch
+        function passiveStretch = SteadyStatePassiveStretch(this, activeStretch)
+            a = length(this.ElectrodedElements); %num active blocks
+            p = length(this.Elements) - a; %num passive blocks
+            L = this.StartElement.NaturalLength; %
+            l = this.StretchedLength;
+            
+            passiveStretch = (l - (a*L*activeStretch))/ ...
+                                      (p*L);
+        end
+        
         %as derived in the paper
         %TODO: Cleanup the bodgy stress calculations
         function sourceVoltage = CalculateDrivingVoltage(this)
@@ -390,21 +455,24 @@ classdef Thread < handle
             lambdaA = 5;
             lambdaB = 1.25;
             
-            elementActive = this.ElementConstructor(...
+            elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
                     Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
                     this.PreStretch, ...
                     this.StartElement.NaturalLength, ...
                     this.MaterialProperties, ...
                     this.GentParams);
-                
-            elementPassive = this.ElementConstructor(...
+            elementActive = this.ElementConstructor(elementInitParams);
+            
+            elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
                     Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
                     this.PreStretch, ...
                     this.StartElement.NaturalLength, ...
                     this.MaterialProperties, ...
                     this.GentParams);
+            elementPassive = this.ElementConstructor(elementInitParams);
+            
             
             %active stress
             elementActive.SetStretchRatio(lambdaA);

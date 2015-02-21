@@ -8,8 +8,6 @@ classdef SimViewer < handle
         Resolution = 1;
         
         ReportsFolder = '../reports/';
-        SaveToFolder = strcat([this.ReportsFolder, this.Sim.Name, '/']);
-            
     end
     
     methods
@@ -38,6 +36,14 @@ classdef SimViewer < handle
             this.LoadCSV;
             
             
+        end
+        
+        function name = OutputFolder(this)
+            name = strcat([this.ReportsFolder, this.Sim.Name, '/']);
+        
+            if(~exist(name, 'dir'))
+                mkdir(name);
+            end
         end
         
         %TODO: Dont think this actually works
@@ -120,7 +126,7 @@ classdef SimViewer < handle
             legend('G(i) = 0', 'G(i) = 1');
             % set(legHandle,'color',legColor)
             % set(legHandle,'FontWeight','bold')
-           
+            
             %Plot the image
             times = this.Times;
             nElectrodes = length(this.Sim.Thread.Electrodes);
@@ -349,8 +355,8 @@ classdef SimViewer < handle
             this.SaveFigure(@this.PlotStretchRatio, 'stretch_ratio')
             this.SaveFigure(@this.PlotVoltage, 'voltage')
             this.SaveFigure(@this.PlotSource, 'source')
-           
-            save(strcat([this.SaveToFolder, this.Sim.Name, '.mat']), 'this');
+            
+            save(strcat([this.OutputFolder, this.Sim.Name, '.mat']), 'this');
         end
         
         %f() is expected to yield a figure
@@ -360,11 +366,7 @@ classdef SimViewer < handle
             f();
             format = 'png';
             
-            if(~exist(saveToFolder, 'dir'))
-                mkdir(saveToFolder);
-            end
-            
-            reportPath = strcat([this.SaveToFolder, name, '.', format]);
+            reportPath = strcat([this.OutputFolder, name, '.', format]);
             saveas(gcf, reportPath, format);
         end
     end

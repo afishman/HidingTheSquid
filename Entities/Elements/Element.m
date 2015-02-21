@@ -35,49 +35,37 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     
     methods
         %Initialises an element at rest in prestretched configuration
-        function this = Element( ...
-                startVertex, ...
-                endVertex, ...
-                preStretch, ...
-                naturalLength, ...
-                materialProperties, ...
-                gentParams)
+        function this = Element(elementInitParams)
+            this.StartVertex = elementInitParams.StartVertex;
+            this.EndVertex = elementInitParams.EndVertex;
+            this.PreStretch = elementInitParams.PreStretch;
+            this.NaturalLength = elementInitParams.NaturalLength;
+            this.MaterialProperties = elementInitParams.MaterialProperties;
+            this.GentParams = elementInitParams.GentParams;
             
-            
-            if(isempty(materialProperties))
+            if(isempty(this.MaterialProperties))
                 error('No material properties given to Element constructor');
             end
             
-            if(isempty(startVertex))
+            if(isempty(this.StartVertex))
                 error('Every Element must define a start vertex');
             end
             
-            if(isempty(endVertex))
+            if(isempty(this.EndVertex))
                 error('Every Element must define a end vertex');
             end
             
-            if(naturalLength <= 0)
+            if(this.NaturalLength <= 0)
                 error('naturalLength must be > 0')
             end
-            
-            this.MaterialProperties = materialProperties;
-            
-            %set connections
-            this.StartVertex = startVertex;
-            this.EndVertex = endVertex;
             
             this.StartVertex.RightElement = this;
             this.EndVertex.LeftElement = this;
             
             %Initialise to prestretch config
-            this.Xi = preStretch;
-            this.PreStretch = preStretch;
-            
+            this.Xi = this.PreStretch;
+            this.PreStretch = this.PreStretch;
             this.Voltage = 0;
-            
-            this.NaturalLength = naturalLength;
-            
-            this.GentParams = gentParams;
         end
         
         function thickness = NaturalThickness(this)

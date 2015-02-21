@@ -10,7 +10,7 @@ electrodeType = ElectrodeTypeEnum.LocallyControlled;
 rOn = 3.7; rOff = 2.6;
 switchingModelLocal = TypeIIModel(rOn, rOff);
 
-tEnd = 5.5; period = 1;
+tEnd = 10; period = 2;
 switchingModelExternal = CyclicSwitchModel(tEnd, period);
 
 %initialises a thread with equally spaced, locally controlled electrodes
@@ -34,7 +34,7 @@ thread.RCCircuit.Resistance = 1e7;
 %Make a simulator object and run for 7s
 simName = mfilename;
 sim = SimulateThread(simName, thread);
-sim.RunSim(7);
+sim.RunSim(30);
 
 %View the output
 viewer = SimViewer(sim.Name);

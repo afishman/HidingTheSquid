@@ -10,7 +10,7 @@ rOn1 = 2.9; rOn2 = 4.7;
 rOff1 = 2.7; rOff2 = 4.9;
 switchingModelLocal = TypeIIIModel(rOn1, rOn2, rOff1, rOff2);
 
-tOn = 0; tOff = 1;
+tOn = 0; tOff = 20;
 switchingModelExternal = StepModel(tOn, tOff);
 
 %NOTE: RCCircuit.Default could have been used here, This is for
@@ -27,9 +27,15 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 spacingAtPrestretch, ...
                 switchingModelLocal, ...
                 switchingModelExternal, ...
-                GentParams.Koh2012);
-                    
-           
+                GentParams.Koh2012, ...
+                @(x)FiberConstrainedElement(x, 1));
+   
+for electrode = thread.Electrodes(2:end)
+    electrode.Type = ElectrodeTypeEnum.ExternallyControlled;
+end
+            
+thread.RCCircuit.Resistance = 1e7;
+            
 %Uncomment this to plot the thread! (it is currently in prestretch config)
 % showNodes = true;
 % sim.Thread.Plot(showNodes);
@@ -37,7 +43,7 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
 %Make a simulator object and run for 7s
 simName = mfilename;
 sim = SimulateThread(simName, thread);
-sim.RunSim(7);
+sim.RunSim(20);
 
 %View the output
 viewer = SimViewer(sim.Name);

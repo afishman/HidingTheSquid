@@ -1,13 +1,13 @@
 %These are optimal paramters
 %TODO: automate the creation of optimally spaced threads
 preStretch = 2.5;
-nCells = 30;
+nCells = 6;
 cellLengthAtPrestretch = 20e-3 * preStretch;
 spacingAtPrestretch = 80e-3 * preStretch;
 electrodeType = ElectrodeTypeEnum.LocallyControlled;
 
 %Define the switching models
-rOn = 2.2; rOff = 4.3;
+rOn = 2.4; rOff = 4.5;
 switchingModelLocal = TypeIModel(rOn, rOff);
 %switchingModelLocal = LocalAlwaysOffModel;
 
@@ -25,15 +25,16 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
     switchingModelExternal, ...
     GentParams.Koh2012, ...
     @(x)FiberConstrainedElement(x,1));
+
+thread.Electrodes(6) = [];
+thread.Electrodes(5) = [];
+thread.Electrodes(3).Type = ElectrodeTypeEnum.ExternallyControlled;
+thread.Electrodes(4).Type = ElectrodeTypeEnum.LocallyControlled;
+thread.Electrodes(2) = [];
+thread.Electrodes(1) = [];
+
+thread.RCCircuit.Resistance = 1e8;
 return
-thread.RCCircuit.SourceVoltage = 5500;
-thread.RCCircuit.Resistance = 1e7;
-
-thread.Electrodes(2).NextElectrode = [];
-for i = length(thread.Electrodes):3
-    thread.Electrodes(i)=[];
-end
-
 %Uncomment this to plot the thread! (it is currently in prestretch config)
 % showNodes = true;
 % sim.Thread.Plot(showNodes);

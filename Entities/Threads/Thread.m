@@ -437,6 +437,39 @@ classdef Thread < handle
                                       (p*L);
         end
         
+        function voltage = CalculateDrivingVoltageForStretch(this, activeStretch)
+            passiveStretch = this.SteadyStatePassiveStretch(activeStretch);
+           
+            elementInitParams = ElementInitParams(...
+                    Vertex(0, 0, 0), ...
+                    Vertex(this.StartElement.NaturalLength*activeStretch, 0, 0), ...
+                    this.PreStretch, ...
+                    this.StartElement.NaturalLength, ...
+                    this.MaterialProperties, ...
+                    this.GentParams);
+            elementActive = this.ElementConstructor(elementInitParams);
+            
+            elementInitParams = ElementInitParams(...
+                    Vertex(0, 0, 0), ...
+                    Vertex(this.StartElement.NaturalLength*passiveStretch, 0, 0), ...
+                    this.PreStretch, ...
+                    this.StartElement.NaturalLength, ...
+                    this.MaterialProperties, ...
+                    this.GentParams);
+            elementPassive = this.ElementConstructor(elementInitParams);
+             
+            %active stress
+            elementActive.SetStretchRatio(activeStretch);
+            elementActive.Xi = activeStretch;
+            
+            %passive stress
+            elementPassive.SetStretchRatio(passiveStretch);
+            elementPassive.Xi = passiveStretch;
+            
+            initialGuess = 5000;
+            voltage = fzero(@(x)this.EquilibriumEquation(elementActive, elementPassive, x), initialGuess);
+        end
+        
         %as derived in the paper
         %TODO: Cleanup the bodgy stress calculations
         function sourceVoltage = CalculateDrivingVoltage(this)
@@ -493,6 +526,9 @@ classdef Thread < handle
             initialGuess = 5000;
             sourceVoltage = fzero(@(voltage) this.EquilibriumEquation(elementActive, elementPassive, voltage), initialGuess);
         end
+       
+        
+        
         
         %The root of this equation 
         function x = EquilibriumEquation(this, elementActive, elementPassive, voltage)
@@ -565,5 +601,7 @@ classdef Thread < handle
             this.FillWithElectrodes(this.StartVertex.Origin, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);
             this.StartElectrode.Type = ElectrodeTypeEnum.ExternallyControlled;
         end
+        
+        
     end
 end

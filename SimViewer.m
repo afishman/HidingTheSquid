@@ -10,7 +10,25 @@ classdef SimViewer < handle
         ReportsFolder = '../reports/';
     end
     
+    methods (Static)
+        function QuickView(name)
+            viewer = SimViewer(name, 0.01);
+            close all;
+            
+            figure;
+            viewer.PlotMaterial;
+            
+            figure;
+            viewer.PlotGlobal;
+            
+            figure;
+            viewer.PlotSource;
+        end
+    end
+    
     methods
+        
+        
         %Pass in the name of sim, not the path
         function this = SimViewer(name, varargin)
             this.States = [];
@@ -357,6 +375,9 @@ classdef SimViewer < handle
             this.SaveFigure(@this.PlotSource, 'source')
             
             save(strcat([this.OutputFolder, this.Sim.Name, '.mat']), 'this');
+            from = SimulateThread.CSVFilename(this.Sim.Name);
+            to = strcat([this.OutputFolder, this.Sim.Name, '.csv']);
+            copyfile(from, to);
         end
         
         %f() is expected to yield a figure

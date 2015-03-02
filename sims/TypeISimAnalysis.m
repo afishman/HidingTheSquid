@@ -1,0 +1,26 @@
+clear all
+clc
+
+%These are optimal paramters
+%TODO: automate the creation of optimally spaced threads
+preStretch = 2.5;
+nCells = 3;
+cellLengthAtPrestretch = 20e-3 * preStretch;
+spacingAtPrestretch = 80e-3 * preStretch;
+
+switchingModelLocal = @LocalAlwaysOffModel;
+switchingModelExternal = @ExtrernalAlwaysOffModel;
+
+%initialises a thread with equally spaced, locally controlled electrodes
+thread = Thread.ConstructThreadWithSpacedElectrodes( ...
+    preStretch, ...
+    cellLengthAtPrestretch, ...
+    nCells, ...
+    spacingAtPrestretch, ...
+    switchingModelLocal, ...
+    switchingModelExternal, ...
+    GentParams.Koh2012, ...
+    @(x)FiberConstrainedElement(x,1));
+
+close all
+thread.Plot

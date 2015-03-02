@@ -141,6 +141,11 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             eta = this.GentParams.Tau * this.GentParams.MuB;
         end
         
+        function SetStretchRatioAndXi(this, stretchRatio)
+            this.SetStretchRatio(stretchRatio);
+            this.Xi = stretchRatio;
+        end
+        
         %TODO HACK: There should be better way to do this
         function SetStretchRatio(this, stretchRatio)
             this.StartVertex.Displacement = 0;

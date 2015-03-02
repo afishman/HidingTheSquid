@@ -259,6 +259,10 @@ classdef Thread < handle
             endVertex = Utils.MinByKey(this.Vertices, @(x) -x.Origin);
         end
         
+        function element = StartElement(this)
+            element = this.StartVertex.RightElement;
+        end
+        
         %Paints electrodes with equal length and spacing from the start
         %point until the end of thread (or it meets another electrode)
         function FillWithElectrodes(this, start, electrodeLength, electrodeType, spacing)
@@ -379,7 +383,7 @@ classdef Thread < handle
             orderedElectrodes(end).NextElectrode = [];
         end
         
-        function [activeStretch, passiveStretch] = CalculateSteadyStateStretches(this)
+        function [activeStretch, passiveStretch] = CalculateSteadyStateStretches(this, nCellsActive)
             elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
                     Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
@@ -399,36 +403,38 @@ classdef Thread < handle
                     this.GentParams);
             elementPassive = this.ElementConstructor(elementInitParams);
          
+            blocksPerCell = length(this.ElectrodedElements) / length(this.Electrodes);
+            nActiveBlocks = round(blocksPerCell)*nCellsActive;
             
-%             guesses = linspace(3,6,100);
-%             vals = arrayfun(@(x)this.CalculateSteadyStateStretchesEqn(x, elementActive, elementPassive), guesses);
-%             
-%             close all
-%             plot(guesses, vals);
+            
+            guesses = linspace(3,6,100);
+            vals = arrayfun(@(x)this.CalculateSteadyStateStretchesEqn(x, nActiveBlocks, elementActive, elementPassive), guesses);
+            
+            close all
+            plot(guesses, vals);
+            grid on
             
             initialGuess = 5;
-            activeStretch = fzero(@(x) this.CalculateSteadyStateStretchesEqn(x, elementActive, elementPassive), initialGuess);
-            passiveStretch = SteadyStatePassiveStretch(this, activeStretch);
+            activeStretch = fzero(@(x) this.CalculateSteadyStateStretchesEqn(x, nActiveBlocks, elementActive, elementPassive), initialGuess);
+            passiveStretch = SteadyStatePassiveStretch(this, activeStretch, nActiveBlocks);
         end
         
-        function x = CalculateSteadyStateStretchesEqn(this, activeStretch, elementActive, elementPassive)
-            %TODO: Dont assume the first vertex is at 0!
-            
-            elementActive.EndVertex.Displacement = elementActive.NaturalLength*(activeStretch - elementActive.PreStretch);
-            elementActive.Xi = activeStretch;
-            
-            passiveStretch = this.SteadyStatePassiveStretch(activeStretch);
-            elementPassive.EndVertex.Displacement = elementPassive.NaturalLength*(passiveStretch - elementPassive.PreStretch);
-            elementPassive.Xi = passiveStretch;
-            
-            
+        function x = CalculateSteadyStateStretchesEqn(this, activeStretch, nActiveBlocks, elementActive, elementPassive)
+            elementActive.SetStretchRatioAndXi(activeStretch);
+            passiveStretch = this.SteadyStatePassiveStretch(activeStretch, nActiveBlocks);
+            elementPassive.SetStretchRatioAndXi(passiveStretch);
             
             x = elementActive.Force - elementPassive.Force;
         end
         
         %assuming the material is split into two sections of equal stetch
-        function passiveStretch = SteadyStatePassiveStretch(this, activeStretch)
-            a = length(this.ElectrodedElements); %num active blocks
+        function passiveStretch = SteadyStatePassiveStretch(this, activeStretch, nActiveBlocks)
+            %a = length(this.ElectrodedElements); %num active blocks
+            if(nActiveBlocks < 0)
+                error('input must be integer');
+            end
+            
+            a = nActiveBlocks;
             p = length(this.Elements) - a; %num passive blocks
             L = this.StartElement.NaturalLength; %
             l = this.StretchedLength;
@@ -438,7 +444,7 @@ classdef Thread < handle
         end
         
         function voltage = DrivingVoltageForStretch(this, activeStretch)
-            passiveStretch = this.SteadyStatePassiveStretch(activeStretch);
+            passiveStretch = this.SteadyStatePassiveStretch(activeStretch, length(this.ElectrodedElements));
            
             elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
@@ -544,11 +550,7 @@ classdef Thread < handle
              x =  (electricalStress - activeStress)*activeFaceArea + passiveStress*passiveFaceArea;
         end
         
-        function element = StartElement(this)
-            element = this.StartVertex.RightElement;
-        end
         
-        %TODO: StartElem
     end
     
     methods(Static)
@@ -594,8 +596,6 @@ classdef Thread < handle
             fprintf('Coarsest Resolution: %.2e\n', Utils.RoundSigFigs(resolution, sigFigs));
             fprintf('Source Voltage: %.2e\n', Utils.RoundSigFigs(this.RCCircuit.SourceVoltage, sigFigs));
             fprintf('Resistance: %.2e\n', Utils.RoundSigFigs(this.RCCircuit.Resistance, sigFigs));
-            fprintf('Any key to continue...');
-            Utils.GetKey;
             
             electrodeType = ElectrodeTypeEnum.LocallyControlled;
             this.FillWithElectrodes(this.StartVertex.Origin, cellLengthAtPrestretch, electrodeType, spacingAtPreStretch);

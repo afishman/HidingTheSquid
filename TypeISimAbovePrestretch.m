@@ -1,17 +1,17 @@
 %Given spacing and a tail
 %clear all
 %
-preStretch = 2.7;
+preStretch = 2.5;
 
 cellLengthAtPrestretch = 20e-3 * 2.5;
 resolution = 50e-3;
-tail = 7*resolution;
-spacingAtPrestretch = 3*resolution;
+tail = 8*resolution;
+spacingAtPrestretch = resolution;
 
 interCellSpacing = 50e-3;
 
 %Define the switching models
-rOn = 2.65; rOff = 4.5;
+rOn = 2.8; rOff = 4.25;
 switchingModelLocal = TypeIModel(rOn, rOff);
 %switchingModelLocal = LocalAlwaysOffModel;
 
@@ -26,7 +26,7 @@ thread.SwitchingModelLocal = switchingModelLocal;
 thread.SwitchingModelExternal = switchingModelExternal;
 
 %Add electrodes
-thread.AddElectrode(tail, cellLengthAtPrestretch, ElectrodeTypeEnum.ExternallyControlled);
+thread.AddElectrode(tail, cellLengthAtPrestretch, ElectrodeTypeEnum.LocallyControlled);
 
 %thread.AddElectrode(0*cellLengthAtPrestretch, cellLengthAtPrestretch, ElectrodeTypeEnum.ExternallyControlled);
 %thread.AddElectrode(1*cellLengthAtPrestretch, cellLengthAtPrestretch, ElectrodeTypeEnum.ExternallyControlled);
@@ -39,12 +39,9 @@ thread.AddElectrode(secondElecrodeStart, cellLengthAtPrestretch, ElectrodeTypeEn
 
 %Find the driving voltage
 activatedCellStretch = 5;
-
-thread.RCCircuit.SourceVoltage = thread.CalculateDrivingVoltageForStretch(activatedCellStretch);
+thread.RCCircuit.SourceVoltage = thread.DrivingVoltageForStretch(activatedCellStretch);
 thread.RCCircuit.Resistance = 1e8;
 
-close all
-thread.Plot
 
 
 %Make a simulator object and run for 7s

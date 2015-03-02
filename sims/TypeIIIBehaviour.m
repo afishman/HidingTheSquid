@@ -29,11 +29,7 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 switchingModelExternal, ...
                 GentParams.Koh2012, ...
                 @(x)FiberConstrainedElement(x, 1));
-   
-for electrode = thread.Electrodes(2:end)
-    electrode.Type = ElectrodeTypeEnum.ExternallyControlled;
-end
-            
+       
 thread.RCCircuit.Resistance = 1e7;
             
 %Uncomment this to plot the thread! (it is currently in prestretch config)

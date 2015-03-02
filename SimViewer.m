@@ -11,7 +11,7 @@ classdef SimViewer < handle
     end
     
     methods (Static)
-        function QuickView(name)
+        function viewer = QuickView(name)
             viewer = SimViewer(name, 0.01);
             close all;
             

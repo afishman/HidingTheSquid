@@ -437,7 +437,7 @@ classdef Thread < handle
                                       (p*L);
         end
         
-        function voltage = CalculateDrivingVoltageForStretch(this, activeStretch)
+        function voltage = DrivingVoltageForStretch(this, activeStretch)
             passiveStretch = this.SteadyStatePassiveStretch(activeStretch);
            
             elementInitParams = ElementInitParams(...

@@ -11,7 +11,7 @@ spacingAtPrestretch = resolution;
 interCellSpacing = 50e-3;
 
 %Define the switching models
-rOn = 2.8; rOff = 4.25;
+rOn = 2.9; rOff = 4.25;
 switchingModelLocal = TypeIModel(rOn, rOff);
 %switchingModelLocal = LocalAlwaysOffModel;
 

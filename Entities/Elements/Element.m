@@ -146,12 +146,17 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             this.Xi = stretchRatio;
         end
         
-        %TODO HACK: There should be better way to do this
+        %by adjusting the end ertex displacement
         function SetStretchRatio(this, stretchRatio)
-            this.StartVertex.Displacement = 0;
             stretchDisplacement = stretchRatio - this.PreStretch;
-            this.EndVertex.Displacement = stretchDisplacement * this.NaturalLength;
+            this.EndVertex.Displacement = this.StartVertex.Displacement + stretchDisplacement * this.NaturalLength;
         end
+        
+        function element = NextElement(this)
+            element = this.EndVertex.RightElement;
+        end
+        
+        
     end
     
     %I think this is what will need to be changed when extending the model

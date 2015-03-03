@@ -263,6 +263,10 @@ classdef Thread < handle
             element = this.StartVertex.RightElement;
         end
         
+        function element = EndElement(this)
+            element = this.EndVertex.LeftElement;
+        end
+        
         %Paints electrodes with equal length and spacing from the start
         %point until the end of thread (or it meets another electrode)
         function FillWithElectrodes(this, start, electrodeLength, electrodeType, spacing)
@@ -359,6 +363,14 @@ classdef Thread < handle
         function state = GetGlobalState(this)
             state = arrayfun(@(x) x.GlobalState, this.Electrodes);
         end
+        
+        function SetAllElectrodeTypes(this, electrodeTypeEnum)
+        
+            for electrode = this.Electrodes
+                electrode.Type = electrodeTypeEnum;
+            end
+            
+        end
        
         function DefineElectrodeNeighbours(this)
             if(isempty(this.Electrodes))
@@ -384,6 +396,9 @@ classdef Thread < handle
         end
         
         function [activeStretch, passiveStretch] = CalculateSteadyStateStretches(this, nCellsActive)
+            
+            
+            
             elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
                     Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
@@ -403,9 +418,7 @@ classdef Thread < handle
                     this.GentParams);
             elementPassive = this.ElementConstructor(elementInitParams);
          
-            blocksPerCell = length(this.ElectrodedElements) / length(this.Electrodes);
-            nActiveBlocks = round(blocksPerCell)*nCellsActive;
-            
+            nActiveBlocks = round(this.BlocksPerCell)*nCellsActive;            
             
             guesses = linspace(3,6,100);
             vals = arrayfun(@(x)this.CalculateSteadyStateStretchesEqn(x, nActiveBlocks, elementActive, elementPassive), guesses);
@@ -418,6 +431,11 @@ classdef Thread < handle
             activeStretch = fzero(@(x) this.CalculateSteadyStateStretchesEqn(x, nActiveBlocks, elementActive, elementPassive), initialGuess);
             passiveStretch = SteadyStatePassiveStretch(this, activeStretch, nActiveBlocks);
         end
+        
+        function blocksPerCell = BlocksPerCell(this)
+            blocksPerCell = length(this.ElectrodedElements) / length(this.Electrodes);
+        end
+        
         
         function x = CalculateSteadyStateStretchesEqn(this, activeStretch, nActiveBlocks, elementActive, elementPassive)
             elementActive.SetStretchRatioAndXi(activeStretch);
@@ -478,17 +496,7 @@ classdef Thread < handle
         
         %as derived in the paper
         %TODO: Cleanup the bodgy stress calculations
-        function sourceVoltage = CalculateDrivingVoltage(this)
-            a = length(this.ElectrodedElements);
-            c = length(this.Elements) - a;
-            
-            %Just to make sure!
-            b = round(this.NaturalLength / this.StartElement.NaturalLength - a);
-            
-            if(c~=a)
-                %error('Something is off in the number of blocks equation. This should really be unit test.')
-            end
-            
+        function sourceVoltage = CalculateDrivingVoltage(this)  
             %TODO: not hardcoded, maybe
             %These hardcoded parameters discretise nicely :)
             lambdaA = 5;
@@ -512,14 +520,9 @@ classdef Thread < handle
                     this.GentParams);
             elementPassive = this.ElementConstructor(elementInitParams);
             
+            elementActive.SetStretchRatioAndXi(lambdaA);
+            elementPassive.SetStretchRatioAndXi(lambdaB);
             
-            %active stress
-            elementActive.SetStretchRatio(lambdaA);
-            elementActive.Xi = lambdaA;
-            
-            %passive stress
-            elementPassive.SetStretchRatio(lambdaB);
-            elementPassive.Xi = lambdaB;
             
 %             guesses=[];
 %             voltages = linspace(3000, 6000, 1000);
@@ -527,13 +530,17 @@ classdef Thread < handle
 %                 guesses(end+1) = this.EquilibriumEquation(elementActive, elementPassive, voltage);
 %             end
 %             
+%             close all; grid on
 %             plot(voltages, guesses);grid on;
 %             
             initialGuess = 5000;
             sourceVoltage = fzero(@(voltage) this.EquilibriumEquation(elementActive, elementPassive, voltage), initialGuess);
         end
        
+        function SetAtSteadyState(this, globalState)
+            
         
+        end
         
         
         %The root of this equation 

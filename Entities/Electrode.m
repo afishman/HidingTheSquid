@@ -130,6 +130,21 @@ classdef Electrode < handle
             stretchRatio = mean(arrayfun(@(x) x.StretchRatio, this.Elements));
         end
         
+        function element = StartElement(this)
+            element = this.StartVertex.RightElement;
+        end
+        
+        function SetStretchRatio(this, stretchRatio)
+            element = this.StartElement;
+            
+            while(element.EndVertex ~= this.EndVertex)
+                element.SetStretchRatio(stretchRatio);
+                element = element.NextElement;
+            end
+            element.SetStretchRatio(stretchRatio);
+            
+        end
+        
         function electrodes = Neighbours(this)
             electrodes = Electrode.empty;
             

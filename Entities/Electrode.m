@@ -130,19 +130,39 @@ classdef Electrode < handle
             stretchRatio = mean(arrayfun(@(x) x.StretchRatio, this.Elements));
         end
         
+        function SetXi(this, xi)
+            for electrode = this.Elements
+                electrode.Xi = xi;
+            end
+        end
+        
         function element = StartElement(this)
             element = this.StartVertex.RightElement;
         end
         
+%         function elements = Elements(this)
+%             elements=[];
+%             
+%             element = this.StartElement;
+%             
+%             while(element.EndVertex ~= this.EndVertex)
+%                 elements(end+1)=element;
+%                 element = element.NextElement;
+%             end
+%             elements(end+1)=element;
+%             
+%         end
+        
         function SetStretchRatio(this, stretchRatio)
-            element = this.StartElement;
-            
-            while(element.EndVertex ~= this.EndVertex)
+            for element = this.Elements
                 element.SetStretchRatio(stretchRatio);
-                element = element.NextElement;
             end
-            element.SetStretchRatio(stretchRatio);
-            
+        end
+        
+        function SetVoltage(this, voltage)
+            for element = this.Elements
+                element.Voltage = voltage;
+            end
         end
         
         function electrodes = Neighbours(this)

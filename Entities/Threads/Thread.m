@@ -436,6 +436,14 @@ classdef Thread < handle
             blocksPerCell = length(this.ElectrodedElements) / length(this.Electrodes);
         end
         
+        function elements = GetPassiveSection(this, element)
+            elements=element;
+            
+            while(~isempty(element) && isempty(element.RCCircuit))
+                elements(end+1) = element;
+                element = element.NextElement;
+            end
+        end
         
         function x = CalculateSteadyStateStretchesEqn(this, activeStretch, nActiveBlocks, elementActive, elementPassive)
             elementActive.SetStretchRatioAndXi(activeStretch);

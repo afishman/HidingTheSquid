@@ -46,7 +46,7 @@ classdef GentParams < handle
             params = GentParams(muA, muB, ja, jb, tau);
         end
         
-        %See http://www.seas.harvard.edu/suo/papers/265.pdf
+        %https://www.ae.utexas.edu/~ruihuang/papers/SoftMat04.pdf
         function params = Lu2012
             muA=45000;
             muB=0;

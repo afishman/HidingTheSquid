@@ -5,14 +5,19 @@ classdef SimViewer < handle
         RawData;
         
         %In seconds, how often to take a line of data
-        Resolution = 1;
+        Resolution = 0.01;
         
-        ReportsFolder = '../reports/';
+        ReportsFolder;
     end
     
     methods (Static)
+        function viewer = LoadReport(name)
+            path = strcat([DefaultSettings.ReportsFolder, name]);
+            viewer = SimViewer(name);
+        end
+        
         function viewer = QuickView(name)
-            viewer = SimViewer(name, 0.01);
+            viewer = SimViewer(name);
             close all;
             
             figure;
@@ -23,6 +28,8 @@ classdef SimViewer < handle
             
             figure;
             viewer.PlotSource;
+            
+            
         end
     end
     
@@ -31,6 +38,8 @@ classdef SimViewer < handle
         
         %Pass in the name of sim, not the path
         function this = SimViewer(name, varargin)
+            this.ReportsFolder = DefaultSettings.ReportsFolder;
+            
             this.States = [];
             
             %Filename
@@ -390,6 +399,23 @@ classdef SimViewer < handle
             reportPath = strcat([this.OutputFolder, name, '.', format]);
             saveas(gcf, reportPath, format);
         end
+        
+        function ExtendStart(this, t)
+            thread = this.States(1).Thread;
+            localState = this.States(1).LocalState;
+            globalState = this.States(1).GlobalState;
+            newState = ThreadState(thread, t, localState, globalState);
+            
+            this.States = [newState, this.States];
+        end
+
+        function RemoveEnd(this, tMax)
+        
+            for state = this.States
+                
+            end
+        end
+        
     end
     
 end

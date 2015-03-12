@@ -102,6 +102,11 @@ classdef SimulateThread < handle
         function [value,isterminal,direction] = EventsFun(this, t, y)
             this.Thread.SetLocalState(y);
             [value,isterminal,direction] = arrayfun(@(x) x.EventsFun(t), this.Thread.Electrodes);
+            
+            %handle all off
+            value = [t-this.Thread.SwitchAllOff, value];
+            isterminal = [true, isterminal];
+            direction = [0, direction];
         end
         
         function outVars = OdeFun(this, t, y)

@@ -1,6 +1,6 @@
 clear all
 
-viewer = SimViewer.LoadReport('TypeIIBEhaviour');
+viewer = SimViewer.LoadReport('TypeIIBehaviour');
 
 close all
 viewer.ExtendStart(-2);

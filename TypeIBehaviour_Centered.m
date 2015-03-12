@@ -12,8 +12,8 @@ rOn = 2.8; rOff = 4.2;
 switchingModelLocal = TypeIModel(rOn, rOff);
 %switchingModelLocal = LocalAlwaysOffModel;
 
-timeOn = 0; timeOff = 25;
-switchingModelExternal = StepModel(timeOn, timeOff);
+timeOff = 25;
+switchingModelExternal = StepModel(0, timeOff);
 %switchingModelExternal = LocalAlwaysOffModel;
 
 stretchedLength = cellLengthAtPrestretch + 2*tail;
@@ -21,6 +21,7 @@ elementConstructor = @(x) FiberConstrainedElement(x,1);
 thread = Thread(stretchedLength, resolution, preStretch, elementConstructor, GentParams.Koh2012);
 thread.SwitchingModelLocal = switchingModelLocal;
 thread.SwitchingModelExternal = switchingModelExternal;
+thread.SwitchAllOff = timeOff;
 
 %Add electrodes
 thread.AddElectrode(tail, cellLengthAtPrestretch, ElectrodeTypeEnum.LocallyControlled);

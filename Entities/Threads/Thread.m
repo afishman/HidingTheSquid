@@ -17,6 +17,7 @@ classdef Thread < handle
         %Local sensing rules for each electrode
         SwitchingModelLocal  = StepModel(0,1); 
         SwitchingModelExternal = ExternalAlwaysOffModel(); 
+        SwitchAllOff = 999999999999;
         
         Vertices = Vertex.empty;
         Electrodes = Electrode.empty;
@@ -338,7 +339,13 @@ classdef Thread < handle
         end
         
         function UpdateGlobalStates(this, time)
-            arrayfun(@(x) x.UpdateGlobalState(time), this.Electrodes);
+            if(time >= this.SwitchAllOff)
+                for electrode = this.Electrodes
+                    electrode.GlobalState = false;
+                end
+            else
+                arrayfun(@(x) x.UpdateGlobalState(time), this.Electrodes);
+            end
         end
 
         function SetGlobalState(this, state)

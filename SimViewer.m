@@ -12,8 +12,9 @@ classdef SimViewer < handle
     
     methods (Static)
         function viewer = LoadReport(name)
-            path = strcat([DefaultSettings.ReportsFolder, name]);
-            viewer = SimViewer(name);
+            %TODO: DRY this up into a utility
+            path = strcat(['../', DefaultSettings.ReportsFolder, name, '/',name]);
+            viewer = SimViewer(path);
         end
         
         function viewer = QuickView(name)
@@ -383,7 +384,11 @@ classdef SimViewer < handle
             this.SaveFigure(@this.PlotVoltage, 'voltage')
             this.SaveFigure(@this.PlotSource, 'source')
             
-            save(strcat([this.OutputFolder, this.Sim.Name, '.mat']), 'this');
+            %TODO: DRYing
+            from = SimulateThread.SimObjectFilename(this.Sim.Name);
+            to = strcat([this.OutputFolder, this.Sim.Name, '.mat']);
+            copyfile(from, to);
+            
             from = SimulateThread.CSVFilename(this.Sim.Name);
             to = strcat([this.OutputFolder, this.Sim.Name, '.csv']);
             copyfile(from, to);

@@ -351,6 +351,20 @@ classdef Utils
                 delete(fh) ;
             end
         end
+        
+        function img = ImportBMPIntoBW(path)
+            %%Import the image
+            [rawImg,colormap]=imread(path);
+            
+            %Merge the colourmap
+            img=zeros(size(rawImg));
+            
+            for i=1:size(colormap,1)
+                img(rawImg == i-1) = mean(colormap(i,:).*255);
+            end
+            
+            img=uint8(img);
+        end
     end
 end
 

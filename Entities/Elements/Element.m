@@ -156,7 +156,9 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             element = this.EndVertex.RightElement;
         end
         
-        
+        function isElectroded = IsElectroded(this)
+            isElectroded = ~isempty(this.RCCircuit);
+        end
     end
     
     %I think this is what will need to be changed when extending the model

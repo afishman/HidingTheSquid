@@ -8,8 +8,8 @@ classdef SimAnimator
         CuttleCodedImagePath = 'Static/laura_cuttle_coded.bmp';
         CuttleCodedImage;
         
-        CuttleColor1 = [47 ,117,117];
-        CuttleColor2 = [119,200,185];
+        CuttleColor1 = [47 ,117,117]./255;
+        CuttleColor2 = [119,200,185]./255;
 
         MainBodyPixelCode = 64; % Indicates the pixel value on the main vody of the cuttlefish
         MainBodyColor;
@@ -36,9 +36,24 @@ classdef SimAnimator
             framerate = 30;
             speed = 1;
             
-            
+            close all
+            this.PlotThreadState(this.Viewer.States(1));
         end
         
+        function PlotThreadState(this, state)
+            hold on
+            
+            state.SetState;
+            for element = state.Thread.Elements
+                if(element.IsElectroded)
+                    color = this.CuttleColor1;
+                else
+                    color = this.CuttleColor2;
+                end
+                
+                this.PlotFilled(element.StartVertex.Position, element.EndVertex.Position, color);
+            end
+        end
         
         %mask(i,j,k) == true means that pixel should be replaced with
         %corresponding value in the striped plot
@@ -125,20 +140,17 @@ classdef SimAnimator
         
         %Plot a filled polygon, given a line, start and end
         %TODO: Add input args
-        function PlotFilled(this)
+        function PlotFilled(this, startPosition, endPosition, color)
             handle = gca;
-            x1 = 0;
-            x2 = 1;
-            color = 'r';
             
             theLine = this.bezQuad;
             
             firstHalf = this.bezQuad;
-            shift = Point2D(x1, 0);
+            shift = Point2D(startPosition, 0);
             arrayfun(@(x) x.Transpose(shift), firstHalf);
             
             secondHalf = fliplr(this.bezQuad);
-            shift = Point2D(x2, 0);
+            shift = Point2D(endPosition, 0);
             arrayfun(@(x) x.Transpose(shift), secondHalf);
             
             polygonPoints = [firstHalf, secondHalf];

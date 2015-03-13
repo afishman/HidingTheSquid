@@ -10,7 +10,7 @@ classdef TypeIGlobalFigure < SimFigure
         
         function Generate(this)
             this.Viewer.PlotGlobal
-            ylim([0.5,1.5])
+            ylim([0,1])
             set(gca, 'YTick', [])
             ylabel('');
         end

@@ -3,7 +3,7 @@ function figures = TypeIIFigures
 %   Detailed explanation goes here
 simName = 'TypeIIBehaviour';
 viewer = SimViewer.LoadReport(simName);
-viewer.ExtendStart(-2);
+viewer.ExtendStart(-2, true);
 
 figures = [TypeIIMaterialFigure(viewer), TypeIIGlobalFigure(viewer)];
 

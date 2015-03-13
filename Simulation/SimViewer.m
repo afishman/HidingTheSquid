@@ -144,7 +144,7 @@ classdef SimViewer < handle
             
             
             %Make the legend
-            x=0;y=0; ms=15;
+            x=0;y=-1; ms=15;
             plot(x,y,'marker','square','markersize',ms,...
                 'markeredgecolor','k','markerfacecolor',c1,...
                 'color','w');
@@ -157,22 +157,29 @@ classdef SimViewer < handle
             %Plot the image
             times = this.Times;
             nElectrodes = length(this.Sim.Thread.Electrodes);
-            imagesc(times, 1:nElectrodes, globalStates');
+            
+            
+            %HACK: oh matlab! The hacky things you make me do to get production
+            %quality images! (Using imagesc produces blurry eps images)
+            pcolor(times, 0:nElectrodes, [globalStates, zeros(size(globalStates,1),1)]');
+            
+            shading flat
+            
             colormap(flipud(gray));
             
             xlim([min(times), max(times)]);
-            set(gca, 'YTick', 1:nElectrodes);
-            %ylim([1, nElectrodes]);
+            
+            set(gca, 'YTick', 0.5:1:nElectrodes-0.5);
+            set(gca, 'YTickLabel', 1:nElectrodes);
+            ylim([0, nElectrodes]);
             
             %And the gridlines
-            yGridPositions = 0.5:1:nElectrodes+0.5;
+            yGridPositions = 0:1:nElectrodes;
             for position = yGridPositions
                 x=[times(1), times(end)];
                 y=[position, position];
                 plot(x,y,'color',gridColor)
             end
-
-            ylim([0.5, length(this.Sim.Thread.Electrodes)+0.5]);
             
             title('Global State');
             xlabel('Time (s)');

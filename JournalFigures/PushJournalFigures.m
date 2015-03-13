@@ -1,7 +1,7 @@
 clc
  
 figures = JournalFigureStub.empty;
-figures = [figures, TypeIFigures, TypeIIFigures];
+figures = [figures, CrossectionFigures, TypeIFigures, TypeIIFigures];
 
 for figure = figures
     figure.WriteToFile;

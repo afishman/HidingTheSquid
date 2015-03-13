@@ -37,21 +37,11 @@ classdef SimAnimator
         end
         
         %TODO: be more precise with masking to get maximum cells!
-        function MakeMovie(this)
-            framerate = 30;
-            speed = 1;
-            
-            img=cell(0,1);
-            
-            for state = this.Viewer.States
-                
-            end
-            
-            state = this.Viewer.States(1);
-            
+        function img = PlotFrame(this, tFrame)
+            img = this.PlotThreadStateOntoCuttlefish(this.Viewer.InterpolateRawData(tFrame));
         end
         
-        function img = PlotThreadStateOntoCuttlefish(this, state)
+        function frameImage = PlotThreadStateOntoCuttlefish(this, state)
             dimensions = this.FrameDimensions;
             
             cuttlefishImage = imresize(this.ColorCodedCuttlefishImage, dimensions);

@@ -31,13 +31,47 @@ classdef SimAnimator
             this.FinColor = this.CuttleColor1;
         end
         
+        %plots a set of 4 cuttlefish
+        function figHandle = PlotCuttleSet(this, theTimes)
+            if(length(theTimes)~=4)
+                error('must be give 4 times exactly!!')
+            end
+            
+            close all
+            figHandle = figure;
+            
+            %These arbitrary scalings are setup for my macbook
+            dimensions = this.FrameDimensions;
+            set(figHandle,'Position', [100, 100, 4*dimensions(1), 0.5*dimensions(2)]);
+            
+            for i=1:length(theTimes)
+                t = theTimes(i);
+                
+                img = this.GetFrameImage(t);
+                set(0, 'CurrentFigure', figHandle)
+                subplot(1,4,i);
+                image(img);
+                
+                set(gca, 'YTick',[])
+                
+                %HACK: Matlab does not have a good way to put titles at the
+                %bottom
+                xlimits = xlim;
+                set(gca, 'XTick',mean(xlimits))
+                set(gca, 'XTickLabel', sprintf('t = %.2fs', t));
+                
+            end
+           
+            
+        end
+        
         function dimensions = FrameDimensions(this)
             dimensions = size(this.ColorCodedCuttlefishImage);
             dimensions = dimensions(1:2);
         end
         
         %TODO: be more precise with masking to get maximum cells!
-        function img = PlotFrame(this, tFrame)
+        function img = GetFrameImage(this, tFrame)
             img = this.PlotThreadStateOntoCuttlefish(this.Viewer.InterpolateRawData(tFrame));
         end
         
@@ -46,9 +80,7 @@ classdef SimAnimator
             
             cuttlefishImage = imresize(this.ColorCodedCuttlefishImage, dimensions);
             
-            h = this.PlotThreadState(state);
-            threadStateFrame = getframe(h);
-            threadStateImage = imresize(threadStateFrame.cdata, dimensions);
+            threadStateImage = imresize(this.ThreadStateOnCuttlefishImage(state), dimensions);
             
             %replace cuttlefish image with threadsate using the mask
             mask = this.CuttleMask;
@@ -57,7 +89,7 @@ classdef SimAnimator
             frameImage(mask) = threadStateImage(mask);
         end
         
-        function h = PlotThreadState(this, state)
+        function img = ThreadStateOnCuttlefishImage(this, state)
             h = figure;
             set(h,'defaultaxesposition',[0 0 1 1]);
             axes;
@@ -83,6 +115,10 @@ classdef SimAnimator
             
             set(axisHandle, 'XTick', []);
             set(axisHandle, 'YTick', []);
+            
+            frame = getframe(h);
+            close(h)
+            img = frame.cdata;
         end
         
         %mask(i,j,k) == true means that pixel should be replaced with

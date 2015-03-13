@@ -2,7 +2,7 @@ classdef JournalFigure < handle & matlab.mixin.Heterogeneous
     properties
         
         JournalPath = '../Journal/Submission/';
-        Format = '-depsc';
+        Format = 'epsc';
     end
     
     properties(Abstract)
@@ -18,7 +18,8 @@ classdef JournalFigure < handle & matlab.mixin.Heterogeneous
         function WriteToFile(this)
             close all;
             this.Generate;
-            print([this.JournalPath,this.Name], this.Format);
+            set(gcf,'PaperPositionMode','auto')
+            saveas(gcf, [this.JournalPath,this.Name], this.Format);
         end
     end
 end

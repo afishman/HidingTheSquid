@@ -5,7 +5,7 @@ simName = 'TypeIIBehaviour';
 viewer = SimViewer.LoadReport(simName);
 viewer.ExtendStart(-2, true);
 
-figures = [TypeIIMaterialFigure(viewer), TypeIIGlobalFigure(viewer)];
+figures = [TypeIIMaterialFigure(viewer), TypeIIGlobalFigure(viewer), TypeIICuttleFigure(viewer)];
 
 
 end

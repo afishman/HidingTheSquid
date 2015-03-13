@@ -107,7 +107,8 @@ classdef SimAnimator
                 this.PlotFilled(element.StartVertex.Position, element.EndVertex.Position, color, axisHandle);
             end
             
-            %Shift the image to the left a bit to make it align nicely
+            %TODO: Use precise scalings instead of these arbitrary ones!
+            %Shift the image a bit to make it align nicer
             leftShift = 0.75* state.Thread.StretchedLength;
             rightShift = -0.2* state.Thread.StretchedLength;
             bounds = state.Thread.Bounds;

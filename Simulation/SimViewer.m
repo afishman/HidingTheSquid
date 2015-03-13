@@ -3,7 +3,7 @@ classdef SimViewer < handle
         Sim;
         States;
         RawData;
-        
+        Name;
         %In seconds, how often to take a line of data
         Resolution = 0.01;
         
@@ -13,7 +13,7 @@ classdef SimViewer < handle
     methods (Static)
         function viewer = LoadReport(name)
             %TODO: DRY this up into a utility
-            path = strcat(['../', DefaultSettings.ReportsFolder, name, '/',name]);
+            path = strcat([DefaultSettings.ReportsFolder, name, '/',name]);
             viewer = SimViewer(path);
         end
         
@@ -40,7 +40,7 @@ classdef SimViewer < handle
         %Pass in the name of sim, not the path
         function this = SimViewer(name, varargin)
             this.ReportsFolder = DefaultSettings.ReportsFolder;
-            
+            this.Name = name;
             this.States = [];
             
             %Filename
@@ -68,7 +68,7 @@ classdef SimViewer < handle
         
         function name = OutputFolder(this)
             name = strcat([this.ReportsFolder, this.Sim.Name, '/']);
-        
+            
             if(~exist(name, 'dir'))
                 mkdir(name);
             end
@@ -142,6 +142,7 @@ classdef SimViewer < handle
                 globalStates = [globalStates; arrayfun(@(x) x.GlobalState, electrodes)];
             end
             
+            
             %Make the legend
             x=0;y=0; ms=15;
             plot(x,y,'marker','square','markersize',ms,...
@@ -150,10 +151,8 @@ classdef SimViewer < handle
             plot(x,y,'marker','square','markersize',ms,...
                 'markeredgecolor','k','markerfacecolor',c2,...
                 'color','w');
-            % plot(x,y,'color',c1,'linewidth',lw)
-            legend('G(i) = 0', 'G(i) = 1');
-            % set(legHandle,'color',legColor)
-            % set(legHandle,'FontWeight','bold')
+            
+            legend('G(i) = 0', 'G(i) = 1', 'Location','northwest');
             
             %Plot the image
             times = this.Times;
@@ -172,6 +171,8 @@ classdef SimViewer < handle
                 y=[position, position];
                 plot(x,y,'color',gridColor)
             end
+
+            ylim([0.5, length(this.Sim.Thread.Electrodes)+0.5]);
             
             title('Global State');
             xlabel('Time (s)');
@@ -247,14 +248,12 @@ classdef SimViewer < handle
         end
         
         function LoadCSV(this)
-            
-            id = fopen(this.Sim.CSVFilename(this.Sim.Name), 'r');
+            id = fopen(this.Sim.CSVFilename(this.Name), 'r');
             
             %Read a line
-            line = this.TakeLine(id);
-            
-            %Get the data
             this.RawData=[];
+            line = this.TakeLine(id);
+            this.AddToRawData(line);
             
             %The rate: pps
             %Initialise for the while loop
@@ -281,9 +280,7 @@ classdef SimViewer < handle
                     %TODO: This is silly, there should be a time indepndant
                     %solution here
                     if (line~=-1) & ((takeLineSum>this.Resolution) | line(1)<=0)
-                        this.RawData = [this.RawData; line];
-                        
-                        this.SaveState(line);
+                        this.AddToRawData(line);
                         %Reset sum
                         takeLineSum=0;
                     end
@@ -299,16 +296,46 @@ classdef SimViewer < handle
                     %                         break
                     %                     end
                 end
+                
+                
             end
             
+            this.InterpolateRawData();
             %Close the file
             fclose('all');
             
         end
         
+        function AddToRawData(this, line)
+            this.RawData = [this.RawData; line];
+        end
+        
+        function InterpolateRawData(this)
+            this.States=[];
+            
+            times = this.RawData(:,1);
+            sampleTimes = times(1) : this.Resolution : times(end);
+            interpolated = interp1(times, this.RawData, sampleTimes);
+            
+            for i=1:size(interpolated,1)
+                this.SaveState(interpolated(i,:));
+            end
+        end
+        
+        function InterpolateStates(this)
+            this.RawData=[];
+            
+            for state = this.States
+                line = [state.Time, state.LocalState, state.GlobalState];
+                this.RawData=[this.RawData; line];
+            end
+            
+            this.InterpolateRawData;
+        end
         
         %Format: [t, local, global]
         function SaveState(this, line)
+            
             
             nLocalVars = length(this.Sim.Thread.GetLocalState);
             nGlobalVars = length(this.Sim.Thread.GetGlobalState);
@@ -317,7 +344,7 @@ classdef SimViewer < handle
             
             %check if line has the correct number of elements
             width = size(this.RawData,2);
-            if width ~= total
+            if length(line) ~= total
                 error(strcat(['incorrect number of elements: ', total, ...
                     ' (expecting: ', width]));
             end
@@ -329,10 +356,12 @@ classdef SimViewer < handle
             localState = line(index : index + nLocalVars - 1);
             index = index + nLocalVars;
             
-            globalState = line(index : index + nGlobalVars - 1);
+            globalState = round(line(index : index + nGlobalVars - 1));
             
             this.States = [this.States, ThreadState(this.Sim.Thread, t, localState, globalState)];
         end
+        
+        
         
         function line = TakeLine(this, id)
             tline = fgetl(id);
@@ -405,17 +434,29 @@ classdef SimViewer < handle
             saveas(gcf, reportPath, format);
         end
         
-        function ExtendStart(this, t)
+        function ExtendStart(this, t, forceOff)
+            if(nargin == 2)
+                forceOff = false;
+            end
+            
+            if(forceOff)
+                globalState = false(1,length(this.States(1).GlobalState));
+            else
+                globalState = this.States(1).GlobalState;
+            end
+            
             thread = this.States(1).Thread;
             localState = this.States(1).LocalState;
-            globalState = this.States(1).GlobalState;
-            newState = ThreadState(thread, t, localState, globalState);
             
-            this.States = [newState, this.States];
+            newState1 = ThreadState(thread, t, localState, globalState);
+            newState2 = ThreadState(thread, this.States(1).Time-eps, localState, globalState);
+            this.States = [newState1, newState2, this.States];
+            
+            this.InterpolateStates;
         end
-
-        function RemoveEnd(this, tMax)
         
+        function RemoveEnd(this, tMax)
+            
             for state = this.States
                 
             end

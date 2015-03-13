@@ -8,7 +8,7 @@ resolution = 50e-3;
 tail = 3*resolution;
 
 %Define the switching models
-rOn = 2.8; rOff = 4.2;
+rOn = 2.9; rOff = 4.2;
 switchingModelLocal = TypeIModel(rOn, rOff);
 %switchingModelLocal = LocalAlwaysOffModel;
 

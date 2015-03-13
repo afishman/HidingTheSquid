@@ -307,7 +307,7 @@ classdef SimViewer < handle
                 
             end
             
-            this.InterpolateRawData();
+            this.SetStatesToRawData();
             %Close the file
             fclose('all');
             
@@ -317,28 +317,32 @@ classdef SimViewer < handle
             this.RawData = [this.RawData; line];
         end
         
-        function InterpolateRawData(this)
-            this.States=[];
-            
+        function SetStatesToRawData(this)
             times = this.RawData(:,1);
             sampleTimes = times(1) : this.Resolution : times(end);
+            this.States = this.InterpolateRawData(sampleTimes);
+        end
+        
+        function states = InterpolateRawData(this, sampleTimes)
+            states=ThreadState.empty;
+            
+            times = this.RawData(:,1);
             interpolated = interp1(times, this.RawData, sampleTimes);
             
             for i=1:size(interpolated,1)
-                this.SaveState(interpolated(i,:));
+                states(end+1) = this.MakeState(interpolated(i,:));
             end
         end
         
-        
-        function InterpolateStates(this)
+        function ResetRawDataAndStates(this, states)
             this.RawData=[];
             
-            for state = this.States
+            for state = states
                 line = [state.Time, state.LocalState, state.GlobalState];
                 this.RawData=[this.RawData; line];
             end
             
-            this.InterpolateRawData;
+            this.SetStatesToRawData;
         end
         
         %Format: [t, local, global]
@@ -459,9 +463,9 @@ classdef SimViewer < handle
             
             newState1 = ThreadState(thread, t, localState, globalState);
             newState2 = ThreadState(thread, this.States(1).Time-eps, localState, globalState);
-            this.States = [newState1, newState2, this.States];
+            newStates = [newState1, newState2, this.States];
             
-            this.InterpolateStates;
+            this.ResetRawDataAndStates(newStates);
         end
         
         function RemoveEnd(this, tMax)

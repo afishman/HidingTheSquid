@@ -572,7 +572,9 @@ classdef Thread < handle
              x =  (electricalStress - activeStress)*activeFaceArea + passiveStress*passiveFaceArea;
         end
         
-        
+        function bounds = Bounds(this)
+            bounds = [this.StartVertex.Position, this.EndVertex.Position];
+        end
     end
     
     methods(Static)

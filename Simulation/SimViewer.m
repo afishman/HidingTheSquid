@@ -329,6 +329,7 @@ classdef SimViewer < handle
             end
         end
         
+        
         function InterpolateStates(this)
             this.RawData=[];
             
@@ -342,8 +343,10 @@ classdef SimViewer < handle
         
         %Format: [t, local, global]
         function SaveState(this, line)
-            
-            
+            this.States = [this.States, this.MakeState(line)];
+        end
+        
+        function state = MakeState(this, line)
             nLocalVars = length(this.Sim.Thread.GetLocalState);
             nGlobalVars = length(this.Sim.Thread.GetGlobalState);
             
@@ -364,8 +367,7 @@ classdef SimViewer < handle
             index = index + nLocalVars;
             
             globalState = round(line(index : index + nGlobalVars - 1));
-            
-            this.States = [this.States, ThreadState(this.Sim.Thread, t, localState, globalState)];
+            state = ThreadState(this.Sim.Thread, t, localState, globalState);
         end
         
         

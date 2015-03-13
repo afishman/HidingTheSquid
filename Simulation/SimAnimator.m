@@ -8,8 +8,8 @@ classdef SimAnimator
         CuttleCodedImagePath = 'Static/laura_cuttle_coded.bmp';
         CuttleCodedImage;
         
-        CuttleColor1 = [47 ,117,117]./255;
-        CuttleColor2 = [119,200,185]./255;
+        CuttleColor1 = [47 ,117,117];
+        CuttleColor2 = [119,200,185];
 
         MainBodyPixelCode = 64; % Indicates the pixel value on the main vody of the cuttlefish
         MainBodyColor;
@@ -31,17 +31,48 @@ classdef SimAnimator
             this.FinColor = this.CuttleColor1;
         end
         
+        function dimensions = FrameDimensions(this)
+            dimensions = size(this.ColorCodedCuttlefishImage);
+            dimensions = dimensions(1:2);
+        end
         
+        %TODO: be more precise with masking to get maximum cells!
         function MakeMovie(this)
             framerate = 30;
             speed = 1;
             
-            close all
-            this.PlotThreadState(this.Viewer.States(1));
+            img=cell(0,1);
+            
+            for state = this.Viewer.States
+                
+            end
+            
+            state = this.Viewer.States(1);
+            
         end
         
-        function PlotThreadState(this, state)
-            hold on
+        function img = PlotThreadStateOntoCuttlefish(this, state)
+            dimensions = this.FrameDimensions;
+            
+            cuttlefishImage = imresize(this.ColorCodedCuttlefishImage, dimensions);
+            
+            h = this.PlotThreadState(state);
+            threadStateFrame = getframe(h);
+            threadStateImage = imresize(threadStateFrame.cdata, dimensions);
+            
+            %replace cuttlefish image with threadsate using the mask
+            mask = this.CuttleMask;
+            
+            frameImage = cuttlefishImage;
+            frameImage(mask) = threadStateImage(mask);
+        end
+        
+        function h = PlotThreadState(this, state)
+            h = figure;
+            set(h,'defaultaxesposition',[0 0 1 1]);
+            axes;
+            axisHandle = findobj(h,'type','axes');
+            hold(axisHandle, 'on');
             
             state.SetState;
             for element = state.Thread.Elements
@@ -51,8 +82,17 @@ classdef SimAnimator
                     color = this.CuttleColor2;
                 end
                 
-                this.PlotFilled(element.StartVertex.Position, element.EndVertex.Position, color);
+                this.PlotFilled(element.StartVertex.Position, element.EndVertex.Position, color, axisHandle);
             end
+            
+            %Shift the image to the left a bit to make it align nicely
+            leftShift = 0.75* state.Thread.StretchedLength;
+            rightShift = -0.2* state.Thread.StretchedLength;
+            bounds = state.Thread.Bounds;
+            xlim([bounds(1) - rightShift, bounds(2) + leftShift]);
+            
+            set(axisHandle, 'XTick', []);
+            set(axisHandle, 'YTick', []);
         end
         
         %mask(i,j,k) == true means that pixel should be replaced with
@@ -61,6 +101,7 @@ classdef SimAnimator
             mask = uint8(this.CuttleCodedImage==this.MainBodyPixelCode);
             mask(:,:,2) = mask(:,:,1);
             mask(:,:,3) = mask(:,:,1);
+            mask = logical(mask);
         end
         
         %Converts to the coded image to rgb colors
@@ -78,11 +119,10 @@ classdef SimAnimator
             
             %Make uint8
             img= uint8(img);
-            
-            image(img);
         end
        
         %Colors a 3D image using a 2D codemap
+        %color should be uint8
         %pixels equal to the code are colored ane are 0 otherwise
         function img3D=ColorByNumber(this, img3D, codemap, code, color)
             codemapSize = size(codemap);
@@ -139,11 +179,10 @@ classdef SimAnimator
         end
         
         %Plot a filled polygon, given a line, start and end
+        %color should be uint8
         %TODO: Add input args
-        function PlotFilled(this, startPosition, endPosition, color)
-            handle = gca;
-            
-            theLine = this.bezQuad;
+        function PlotFilled(this, startPosition, endPosition, color, axesHandle)
+            color = color ./ 255;
             
             firstHalf = this.bezQuad;
             shift = Point2D(startPosition, 0);
@@ -158,7 +197,7 @@ classdef SimAnimator
             x = arrayfun(@(x) x.X, polygonPoints);
             y = arrayfun(@(x) x.Y, polygonPoints);
             
-            fill(x,y,color, 'Parent', handle, 'EdgeColor', color)
+            fill(x,y,color, 'Parent', axesHandle, 'EdgeColor', color)
         end
         
     end

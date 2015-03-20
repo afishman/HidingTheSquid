@@ -53,12 +53,14 @@ classdef TypeIIIModel < SwitchingModelLocal
         
         function state = ActivationRule(this, electrode)
             source = this.Source(electrode);
-            state = this.ROn1 <= source && source <= this.ROn2;
+            state = (this.ROn1 <= source && source <= this.ROn2) || ...
+                (Utils.WithinTolerance(this.ROn1, source) || Utils.WithinTolerance(this.ROn2, source));
         end
         
         function state = DeactivationRule(this, electrode)
             source = this.Source(electrode);
-            state = source <= this.ROff1 || this.ROff2 <= source;
+            state = (source <= this.ROff1 || this.ROff2 <= source) || ...
+                (Utils.WithinTolerance(this.ROff1, source) || Utils.WithinTolerance(this.ROff2, source));
         end
         
         %A pair of quadratics used here

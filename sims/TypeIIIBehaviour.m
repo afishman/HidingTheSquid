@@ -6,8 +6,8 @@ cellLengthAtPrestretch = 20e-3 * preStretch;
 spacingAtPrestretch = 40e-3 * preStretch;
 
 %Define the switching models
-rOn1 = 2.9; rOn2 = 4.7;
-rOff1 = 2.7; rOff2 = 4.9;
+rOn1 = 2.8; rOn2 = 2.9;
+rOff1 = 2.6; rOff2 = 3.8;
 switchingModelLocal = TypeIIIModel(rOn1, rOn2, rOff1, rOff2);
 
 tOn = 0; tOff = 20;

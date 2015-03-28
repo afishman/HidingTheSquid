@@ -10,7 +10,7 @@ classdef SimAnimator
         
         CuttleColor1 = [47 ,117,117];
         CuttleColor2 = [119,200,185];
-
+        
         MainBodyPixelCode = 64; % Indicates the pixel value on the main vody of the cuttlefish
         MainBodyColor;
         
@@ -22,6 +22,7 @@ classdef SimAnimator
     end
     
     methods
+        
         function this=SimAnimator(viewer)
             this.Viewer = viewer;
             this.CuttleCodedImage = Utils.ImportBMPIntoBW(this.CuttleCodedImagePath);
@@ -29,6 +30,24 @@ classdef SimAnimator
             this.MainBodyColor = this.CuttleColor1;
             this.HeadColor = this.CuttleColor2;
             this.FinColor = this.CuttleColor1;
+        end
+        
+        function RenderToMp4(this)
+            writerObj = VideoWriter(['sims/', this.Viewer.Sim.Name,'.mp4'], 'MPEG-4');
+            writerObj.FrameRate = 30;
+            open(writerObj);
+            
+            tStart = min(this.Viewer.Times);
+            tEnd = max(this.Viewer.Times);
+            
+            for t = tStart : 1/writerObj.FrameRate : tEnd
+                clc
+                fprintf('%.0f%% complete', 100*t/tEnd);
+                img = this.GetFrameImage(t);
+                writeVideo(writerObj,img);
+            end
+            
+            close(writerObj);
         end
         
         %plots a set of 4 cuttlefish
@@ -40,16 +59,33 @@ classdef SimAnimator
             close all
             figHandle = figure;
             
+            %In proportion to the frame dimension size
+            extraHeight = 0.15;
+            extraWidth = 0.1;
+            
             %These arbitrary scalings are setup for my macbook
             dimensions = this.FrameDimensions;
-            set(figHandle,'Position', [100, 100, 4*dimensions(1), 0.5*dimensions(2)]);
+            imgWidth = dimensions(2);
+            imgHeight = dimensions(1);
+
+            paddingWidth = imgWidth*(extraWidth);
+            paddingHeight = imgHeight*(extraHeight);
+            
+            totalWidth = 4*imgWidth + 3*paddingWidth;
+            totalHeight = imgHeight + paddingHeight;
+            
+            set(figHandle,'Position', [100, 100, totalWidth, totalHeight]);
             
             for i=1:length(theTimes)
                 t = theTimes(i);
                 
                 img = this.GetFrameImage(t);
                 set(0, 'CurrentFigure', figHandle)
-                subplot(1,4,i);
+                
+                leftStart = (i-1)*(imgWidth+paddingWidth)/totalWidth;
+                bottomStart = 1 - imgHeight/totalHeight;
+                
+                subplot(1,4,i, 'Position', [leftStart, bottomStart, imgWidth/totalWidth, imgHeight/totalHeight]);
                 image(img);
                 
                 set(gca, 'YTick',[])
@@ -60,8 +96,10 @@ classdef SimAnimator
                 set(gca, 'XTick',mean(xlimits))
                 set(gca, 'XTickLabel', sprintf('t = %.2fs', t));
                 
+                fontSize = get(gca, 'FontSize');
+                set(gca,'FontSize', fontSize*JournalFigure.CuttleTextAdjustment)
             end
-           
+            
             
         end
         
@@ -91,6 +129,7 @@ classdef SimAnimator
         
         function img = ThreadStateOnCuttlefishImage(this, state)
             h = figure;
+
             set(h,'defaultaxesposition',[0 0 1 1]);
             axes;
             axisHandle = findobj(h,'type','axes');
@@ -139,7 +178,7 @@ classdef SimAnimator
             img(:,:,1) = this.CuttleCodedImage;
             img(:,:,2) = this.CuttleCodedImage;
             img(:,:,3) = this.CuttleCodedImage;
-                        
+            
             img=this.ColorByNumber(img, this.CuttleCodedImage, this.MainBodyPixelCode, this.MainBodyColor);
             img=this.ColorByNumber(img, this.CuttleCodedImage, this.HeadPixelCode, this.HeadColor);
             img=this.ColorByNumber(img, this.CuttleCodedImage, this.FinPixelCode, this.FinColor);
@@ -147,7 +186,7 @@ classdef SimAnimator
             %Make uint8
             img= uint8(img);
         end
-       
+        
         %Colors a 3D image using a 2D codemap
         %color should be uint8
         %pixels equal to the code are colored ane are 0 otherwise
@@ -165,7 +204,7 @@ classdef SimAnimator
             mask(:,:,3) = mask(:,:,1);
             
             %3D image size
-            s = [size(codemap), 3]; 
+            s = [size(codemap), 3];
             
             %A 3D block of color
             colorBlock = zeros(s);

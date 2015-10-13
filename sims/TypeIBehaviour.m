@@ -1,7 +1,7 @@
 %These are optimal paramters
 %TODO: automate the creation of optimally spaced threads
 preStretch = 2.5;
-nCells = 30;
+nCells = 4;
 cellLengthAtPrestretch = 20e-3 * preStretch;
 spacingAtPrestretch = 80e-3 * preStretch;
 electrodeType = ElectrodeTypeEnum.LocallyControlled;

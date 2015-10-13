@@ -1,10 +1,9 @@
 classdef Electrode < handle
     %ELECTRODE represents a section of material that is covered with
     %compliant, conducting electode and hooked up to a RC circuit
-    %   Detailed explanation goes here
-    
+
     properties
-        %TODO: Include a stub element
+        %TODO: Use a stub element instead
         Elements = DissertationElement.empty;
         
         Type = ElectrodeTypeEnum.Undefined;
@@ -141,19 +140,6 @@ classdef Electrode < handle
         function element = StartElement(this)
             element = this.StartVertex.RightElement;
         end
-        
-%         function elements = Elements(this)
-%             elements=[];
-%             
-%             element = this.StartElement;
-%             
-%             while(element.EndVertex ~= this.EndVertex)
-%                 elements(end+1)=element;
-%                 element = element.NextElement;
-%             end
-%             elements(end+1)=element;
-%             
-%         end
         
         function SetStretchRatio(this, stretchRatio)
             for element = this.Elements

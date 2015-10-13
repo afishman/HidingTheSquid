@@ -73,7 +73,7 @@ classdef DissertationElement < Element
         
         
         function Demo(varargin)
-            element = DissertationElement(0, 0, 1, 1, Material_Properties.Default);
+            element = DissertationElement(0, 0, 1, 1, MaterialProperties.Default);
             Element.Demo(element);
         end
         

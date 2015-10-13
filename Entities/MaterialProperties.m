@@ -1,7 +1,4 @@
-%TODO: change to standard naming convention
-classdef Material_Properties < handle
-    %Defaults here are for VHB4910
-    
+classdef MaterialProperties < handle    
     properties
         %Material properties
         Density;    %Material Densoty (kg/m3)
@@ -10,7 +7,7 @@ classdef Material_Properties < handle
     end
     
     methods
-        function this = Material_Properties(density, relativeDielectricConstant, naturalThickness)
+        function this = MaterialProperties(density, relativeDielectricConstant, naturalThickness)
             if(this.Density<0)
                 error('density must be non-zero')
             end
@@ -32,12 +29,13 @@ classdef Material_Properties < handle
     end
     
     methods (Static)
+        % For VHB4910
         function this = Default()
             density = 960;
             relativeDielectricConstant = 4.5 * 8.854187817 * 10^-12;
             naturalThickness = 0.5e-3;
             
-            this = Material_Properties(density, relativeDielectricConstant, naturalThickness);
+            this = MaterialProperties(density, relativeDielectricConstant, naturalThickness);
         end
     end
 end

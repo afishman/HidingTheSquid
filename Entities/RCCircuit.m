@@ -1,5 +1,5 @@
 classdef RCCircuit < handle
-    %RCCIRCUIT holds the parameters of an RCCircuit
+    %RCCIRCUIT holds the parameters of a serial RC Circuit
     
     properties
         Resistance; %Ohms

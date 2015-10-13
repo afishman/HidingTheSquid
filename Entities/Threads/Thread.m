@@ -2,32 +2,37 @@ classdef Thread < handle
     %THREADs model a length of DE with a set of electrodes.
     
     properties   
-        %Thread Properties
-        StretchedLength=300e-3;     %Total thread length (m)
-        PreStretch=2;               %As a stretch ratio
+        %%%Thread Properties
+        %Total thread length (m)
+        StretchedLength=300e-3;
         
-        %was res
-        Resolution = 50e-3;         %Resolution: natural length of a block * preStretch (m)
+        %As a stretch ratio
+        PreStretch=2;               
+        
+        %Resolution: natural length of a block * preStretch (m)
+        Resolution = 50e-3;
 
-        MaterialProperties = Material_Properties.Default;
+        MaterialProperties = MaterialProperties.Default;
         
         %The rc circuit used for each electrode
         RCCircuit = RCCircuit.Default;
         
         %Local sensing rules for each electrode
         SwitchingModelLocal  = StepModel(0,1); 
-        SwitchingModelExternal = ExternalAlwaysOffModel(); 
-        SwitchAllOff = 999999999999;
+        SwitchingModelExternal = ExternalAlwaysOffModel();
+        
+        %You can set the thread to turn everything off after a certain
+        %amount of time
+        SwitchAllOff = Inf;
         
         Vertices = Vertex.empty;
         Electrodes = Electrode.empty;
         
         %NOTE: Only need to adjust ElementConstructor to choose the element subclass
         %DissertationElement used here as a stub since matlab does not
-        %allow empty abstrat classes.
+        %allow empty abstract classes.
         ElementConstructor = @FiberConstrainedElement;
         Elements = DissertationElement.empty;
-        %ElectrodedElements = DissertationElement.empty;
         
         GentParams;
     end

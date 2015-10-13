@@ -1,5 +1,5 @@
 classdef GentParams < handle
-    %Parameters for the Gent Model, as outlined in the paper!
+    %Parameters for the Gent Model, as outlined in the paper
     
     properties
         

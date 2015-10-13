@@ -1,18 +1,20 @@
 classdef Vertex < handle
-    %A VERTEX joins two elements
-    %   Detailed explanation goes here
+    %A VERTEX joins two elements, or an element to a boundary
     
     properties (SetAccess = public)
-        Displacement; % Zero Displacement is 
+        %Displacement from origin
+        Displacement;
+        
         Velocity;
 
-        Origin; %Position of zero displacement in the prestretched configuration!
+        Origin;
+        
+        %These will remain [] if attached to a boundary
         LeftElement=[];
         RightElement=[];
     end
     
     methods
-        %Origin is the position of zero displacement
         function this = Vertex(origin, displacement, velocity)
             this.Origin = origin;
             this.Displacement = displacement;
@@ -23,6 +25,7 @@ classdef Vertex < handle
             position = this.Origin + this.Displacement;
         end
         
+        %Returns [] if there is no next vertex
         function vertex = Next(this)
             if(isempty(this.RightElement))
                 vertex = [];
@@ -33,7 +36,7 @@ classdef Vertex < handle
         
         %Fixed boundary conditions imposed here
         function acceleration = Acceleration(this)
-            if(isempty(this.RightElement) || isempty(this.LeftElement))
+            if (isempty(this.RightElement) || isempty(this.LeftElement))
                 acceleration = 0;
             else
                 mass = (this.LeftElement.Mass + this.RightElement.Mass) / 2;

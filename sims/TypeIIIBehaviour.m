@@ -39,6 +39,7 @@ thread.RCCircuit.Resistance = 1e7;
 %Make a simulator object and run for 7s
 simName = mfilename;
 sim = SimulateThread(simName, thread);
+sim.RelativeErrorTolerance = 1e-2;
 sim.RunSim(20);
 
 %View the output

@@ -10,7 +10,9 @@ classdef TypeIIGlobalFigure < SimFigure
         
         function Generate(this)
             this.Viewer.PlotGlobal
-            xlim([-2,7])
+            xlimits = xlim;
+            xlimits(2) = 8.5;
+            xlim(xlimits)
         end
     end
 end

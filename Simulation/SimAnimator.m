@@ -60,7 +60,7 @@ classdef SimAnimator
             figHandle = figure;
             
             %In proportion to the frame dimension size
-            extraHeight = 0.15;
+            extraHeight = 0.0;
             extraWidth = 0.1;
             
             %These arbitrary scalings are setup for my macbook
@@ -76,31 +76,46 @@ classdef SimAnimator
             
             set(figHandle,'Position', [100, 100, totalWidth, totalHeight]);
             
+            
+            hold on
+            
+            xlim([0, totalWidth]);
+            ylim([0, totalHeight]);
+            lw = 5;
+            plot([-999999, totalWidth], [0,0], 'w', 'LineWidth', lw);
+            plot([0, 0], [-999999,totalHeight], 'w', 'LineWidth', lw);
+            
+            xTicks  = [];
+            xTickLabels = {};
             for i=1:length(theTimes)
+                
                 t = theTimes(i);
                 
                 img = this.GetFrameImage(t);
-                set(0, 'CurrentFigure', figHandle)
                 
-                leftStart = (i-1)*(imgWidth+paddingWidth)/totalWidth;
-                bottomStart = 1 - imgHeight/totalHeight;
+                xStart = (i-1)*(imgWidth+paddingWidth);
+                xRange = xStart : xStart + imgWidth; 
                 
-                subplot(1,4,i, 'Position', [leftStart, bottomStart, imgWidth/totalWidth, imgHeight/totalHeight]);
-                image(img);
+                yRange = 0 : imgHeight;
                 
-                set(gca, 'YTick',[])
+                image(xRange, yRange, flipud(img));
                 
+                
+                
+                xTicks = [xTicks, mean(xRange)];
+                xTickLabels{end+1} = sprintf('t = %.2fs', t);
                 %HACK: Matlab does not have a good way to put titles at the
                 %bottom
-                xlimits = xlim;
-                set(gca, 'XTick',mean(xlimits))
-                set(gca, 'XTickLabel', sprintf('t = %.2fs', t));
+
                 
-                fontSize = get(gca, 'FontSize');
-                set(gca,'FontSize', fontSize*JournalFigure.CuttleTextAdjustment)
+                %fontSize = get(gca, 'FontSize');
+                %set(gca,'FontSize', fontSize*JournalFigure.CuttleTextAdjustment)
             end
             
-            
+    
+            set(gca, 'YTick',[]);
+            set(gca, 'XTick', xTicks)
+            set(gca, 'XTickLabel', xTickLabels);
         end
         
         function dimensions = FrameDimensions(this)

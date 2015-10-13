@@ -8,11 +8,12 @@ classdef TypeIIMaterialFigure < SimFigure
             this@SimFigure(viewer);
         end
     
-        
         function Generate(this)
             figure
             this.Viewer.PlotMaterial
-            xlim([-2, 7])
+            xlimits = xlim;
+            xlimits(2) = 8.5;
+            xlim(xlimits)
         end
     end
 end

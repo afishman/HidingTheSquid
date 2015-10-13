@@ -29,7 +29,11 @@ classdef CrossectionFigure < JournalFigure
             
             plot([0,0], [0,0], 'Color', passiveColor, 'LineWidth', linewidth/10);
             plot([0,0], [0,0], 'Color', activeColor, 'LineWidth', linewidth/10);
-            legend({'Membrane', 'Electrode'});
+            
+            
+            leg = legend({'Membrane', 'Electrode'});
+            legSize = get(leg, 'FontSize');
+            set(leg, 'FontSize', legSize*0.6);
             %plot([thread.StartVertex.Position, thread.EndVertex.Position], [0,0], passiveColor, 'LineWidth', linewidth);
             
             xticks=[0];

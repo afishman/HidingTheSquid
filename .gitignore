@@ -1,5 +1,9 @@
-
+*.avi
+*.mp4
+*.zip
+*.pdf
 *.mat
 *.m~
 *.DS_Store
 *.csv
+reports/

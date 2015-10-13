@@ -12,7 +12,7 @@ classdef SimulateThread < handle
         
         
         %%% Some General properties
-        RelativeErrorTolerance = 1e-4;  %ODE relative error tolerance
+        RelativeErrorTolerance = 1e-6;  %ODE relative error tolerance
         SimTime = 0;  %Time taken for the sim to process;
         PointsPerSecond    = 100;   %Points per second when saving data (using linearly interpolated points) 
        

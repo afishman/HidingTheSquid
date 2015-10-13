@@ -3,7 +3,9 @@ function figures = TypeIIFigures
 %   Detailed explanation goes here
 simName = 'TypeIIBehaviour';
 viewer = SimViewer.LoadReport(simName);
-viewer.ExtendStart(-2, true);
+
+extension = 0.5;
+viewer.ExtendStart(-extension, true);
 
 figures = [TypeIIMaterialFigure(viewer), TypeIIGlobalFigure(viewer), TypeIICuttleFigure(viewer)];
 

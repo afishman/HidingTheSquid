@@ -121,7 +121,7 @@ classdef SimViewer < handle
                 set(h, 'FaceColor', membraneColor);
             end
             
-            title('Sim Material')
+            %title('Sim Material')
             xlabel('Time (s)');
             ylabel('Distance (m)');
         end
@@ -152,7 +152,9 @@ classdef SimViewer < handle
                 'markeredgecolor','k','markerfacecolor',c2,...
                 'color','w');
             
-            legend('G(i) = 0', 'G(i) = 1', 'Location','northwest');
+            leg = legend('G(i) = 0', 'G(i) = 1', 'Location','northwest');
+            legSize = get(leg, 'FontSize');
+            set(leg, 'FontSize', legSize*JournalFigure.LegendTextAdjustment);
             
             %Plot the image
             times = this.Times;
@@ -181,7 +183,7 @@ classdef SimViewer < handle
                 plot(x,y,'color',gridColor)
             end
             
-            title('Global State');
+            %title('Global State');
             xlabel('Time (s)');
             ylabel('Electrode');
         end

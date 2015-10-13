@@ -4,9 +4,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     %   This class is abstract to allow other 1D deformation models to be
     %   implemented. More abstraction could be done, but this is intended to
     %   reflect the equations written up in the paper
-    %
-    %   Implementing new models (such as fiber constrained) should be as
-    %   simple as inheriting from this class
     
     %TODO: DRY this up with Gent model
     properties
@@ -77,10 +74,13 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             lambda = this.PreStretch + (this.EndVertex.Displacement - this.StartVertex.Displacement)/this.NaturalLength;
         
             %TODO: put these limits in a better place
+            %Limiting stretch ratio of 6 is commonly used, see Dielectric Elastomers as Electromechanical Transducers
             if(lambda > 6)
-                %error('Limiting stretch reached');
+                error('Limiting stretch reached');
+                
+                %Somewhat arbitrary
             elseif(lambda < 0.8)
-                %error('compression')
+                error('compression')
             end
         end
         
@@ -132,7 +132,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
                 C = this.Capacitance;
                 CDot = this.CapacitanceDot;
                 
-                
                 dVoltage = (switchClosed*Vs  - V*(1 + R*CDot)) / (R*C);
             end
         end
@@ -146,7 +145,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             this.Xi = stretchRatio;
         end
         
-        %by adjusting the end ertex displacement
+        %by adjusting the end vertex displacement
         function SetStretchRatio(this, stretchRatio)
             stretchDisplacement = stretchRatio - this.PreStretch;
             this.EndVertex.Displacement = this.StartVertex.Displacement + stretchDisplacement * this.NaturalLength;
@@ -177,6 +176,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     
     methods(Static)
         
+       %plots an element's steady state stress against stretch ratio 
        function Demo(element)
             nPts = 100;
             lambdas = linspace(0.8,7,nPts);
@@ -202,9 +202,6 @@ classdef Element < handle & matlab.mixin.Heterogeneous
             xlabel('stretch ratio')
             ylabel('stress')
             title(class(element))
-            
-            
-            
             
             lambdaXiImage = [];
             i = 0;

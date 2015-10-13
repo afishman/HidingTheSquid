@@ -1,4 +1,5 @@
 classdef DissertationElement < Element
+    %TODO: Delete this deprecated element
     %Cunningly named after the one I did for my master's dissertatioan
     %Assumes the width and length are always the same
     

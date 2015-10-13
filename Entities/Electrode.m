@@ -2,11 +2,12 @@ classdef Electrode < handle
     %ELECTRODE represents a section of material that is covered with
     %compliant, conducting electode and hooked up to a RC circuit
     %   Detailed explanation goes here
-    %TODO: Include a stub element
     
     properties
-        Elements = DissertationElement.empty; 
-        Type = ElectrodeTypeEnum.Undefined; %Type: ElectrodeTypeEnum
+        %TODO: Include a stub element
+        Elements = DissertationElement.empty;
+        
+        Type = ElectrodeTypeEnum.Undefined;
         
         RCCircuit;
         
@@ -92,6 +93,7 @@ classdef Electrode < handle
             end
         end
         
+        %Events function for the ODE solver
         function [value, isTerminal, direction] = EventsFun(this, time)
             switch(this.Type)
                 case ElectrodeTypeEnum.ExternallyControlled

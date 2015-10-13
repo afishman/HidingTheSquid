@@ -1,13 +1,13 @@
 classdef FiberConstrainedElement < Element
-    %FIBERCONSTRAINEDELEMENT Summary of this class goes here
-    %   Detailed explanation goes here
+    %FIBERCONSTRAINEDELEMENT, derivation of equations in the paper
     
     properties
         Lambda2Pre;
     end
     
     methods
-        %Nothing special here
+        %Assumes a width prestretch equal to length prestretch if not
+        %defined
         function this = FiberConstrainedElement(elementParams, preStretch2)
             
             this@Element(elementParams);
@@ -20,12 +20,12 @@ classdef FiberConstrainedElement < Element
             
         end
         
-        
         function capacitance = Capacitance(this)
             capacitance = this.MaterialProperties.RelativeDielectricConstant ...
                 .* this.NaturalLength.^2 .* this.NaturalThickness.^-1 .* this.StretchRatio.^4;
         end
         
+        %Rate of change of Capacitance
         function capDot = CapacitanceDot(this)
             capDot = 4 * this.StretchRatio.^3 * this.StretchVelocity * this.NaturalLength.^2 * this.NaturalThickness.^-1 * this.MaterialProperties.RelativeDielectricConstant;
         end
@@ -34,6 +34,7 @@ classdef FiberConstrainedElement < Element
             width = this.Lambda2Pre * this.NaturalWidth;
         end
         
+        %For simplicity
         function naturalWidth = NaturalWidth(this)
             naturalWidth = this.NaturalLength;
         end
@@ -48,7 +49,9 @@ classdef FiberConstrainedElement < Element
             jb = this.GentParams.Jb;
             
             lambda2Pre = this.Lambda2Pre;
-            prodm2 = (lambda*lambda2Pre).^-2; %This comes up alot
+            
+            %For clarity, this comes up alot...
+            prodm2 = (lambda*lambda2Pre).^-2;
             
             
             netA = muA*(lambda.^2 - prodm2) ./ ...
@@ -62,6 +65,7 @@ classdef FiberConstrainedElement < Element
             stress = (netA + netB);
         end
         
+        %Rate of chage of xi
         function dXi = DXi(this)
             lambda = this.StretchRatio;
             xi = this.Xi;
@@ -83,24 +87,6 @@ classdef FiberConstrainedElement < Element
             voltage = 5600;
             rcCircuit = RCCircuit(resistance, voltage);
         end
-        
-    end
-    
-    methods (Static)
-        
-        
-        function Demo(varargin)
-            if(nargin==1)
-                prestretch = varargin{1};
-            else
-                prestretch = 1;
-            end
-            
-            element = FiberConstrainedElement(0, 0, prestretch, 1, Material_Properties.Default);
-
-            Element.Demo(element);
-        end
-       
         
     end
 end

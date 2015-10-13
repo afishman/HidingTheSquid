@@ -1,6 +1,5 @@
 classdef Point2D < handle
-    %POINT2D Summary of this class goes here
-    %   Detailed explanation goes here
+    %Just a simple 2D point
     
     properties
         X;

@@ -1,6 +1,5 @@
 classdef RCCircuit < handle
-    %RCCIRCUIT Summary of this class goes here
-    %   Detailed explanation goes here
+    %RCCIRCUIT holds the parameters of an RCCircuit
     
     properties
         Resistance; %Ohms

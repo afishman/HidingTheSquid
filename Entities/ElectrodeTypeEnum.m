@@ -1,6 +1,5 @@
 classdef ElectrodeTypeEnum < handle
-    %ELECTRODETYPEENUM Summary of this class goes here
-    %   Detailed explanation goes here
+    %ELECTRODETYPEENUM, the type of agent the electrode is
     
     enumeration
         ExternallyControlled, 

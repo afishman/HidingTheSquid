@@ -2,8 +2,9 @@ classdef Element < handle & matlab.mixin.Heterogeneous
     %An ELEMENT is a small bit of material with constant stretch ratio
     %and internal properties
     %   This class is abstract to allow other 1D deformation models to be
-    %   implemented. More abstraction could be done, but this is intended to
-    %   reflect the equations written up in the paper
+    %   implemented, some of which were trialled during research. 
+    %   More abstraction could be done, but this is intended to
+    %   reflect the equations written up in the paper.
     
     %TODO: DRY this up with Gent model
     properties
@@ -17,7 +18,7 @@ classdef Element < handle & matlab.mixin.Heterogeneous
         DefaultResistance = 500; %In ohms
     end
     
-    properties % (SetAccess = private)
+    properties
         StartVertex;
         EndVertex;
         

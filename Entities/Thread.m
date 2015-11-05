@@ -28,11 +28,10 @@ classdef Thread < handle
         Vertices = Vertex.empty;
         Electrodes = Electrode.empty;
         
-        %NOTE: Only need to adjust ElementConstructor to choose the element subclass
-        %DissertationElement used here as a stub since matlab does not
-        %allow empty abstract classes.
+        
+        %A function that returns a new element
         ElementConstructor = @FiberConstrainedElement;
-        Elements = DissertationElement.empty;
+        Elements = StubElement.empty;
         
         GentParams;
     end
@@ -48,6 +47,7 @@ classdef Thread < handle
             this.ElementConstructor = elementConstructor;
             this.GentParams = gentParams;
             
+            %check length of element wrt the length of thread
             if(~Utils.IsApproxMultipleOf(this.Resolution, this.StretchedLength))
                 error('stretched length is not divisible by resolution: \nstretched length %d, \nresolution: %d', this.StretchedLength, this.Resolution); 
             end
@@ -56,11 +56,10 @@ classdef Thread < handle
             %configuration
             naturalLength = this.Resolution / this.PreStretch;
             
-            
-            
             nElements = round(this.StretchedLength / this.Resolution);
             this.Vertices(1) = Vertex(0, 0, 0);
             
+            %Construct the Vertices
             for i = 1:nElements
                 origin = this.Vertices(i).Origin + this.Resolution;
                 this.Vertices(i+1) = Vertex(origin, 0, 0);
@@ -76,6 +75,7 @@ classdef Thread < handle
             end
         end
         
+        %Returns all elements that are part of an electrode
         function elements = ElectrodedElements(this)
             elements=[];
             for electrode = this.Electrodes
@@ -87,7 +87,6 @@ classdef Thread < handle
             mass = sum(arrayfun(@(x) x.Mass, this.Elements));
         end
         
-        %TODO: refactor into element
         function l = NaturalLength(this)
             l = sum(arrayfun(@(x) x.NaturalLength, this.Elements)) ;
         end
@@ -139,8 +138,6 @@ classdef Thread < handle
             set(gca, 'YTick', []);
         end
             
-        %TODO: Plot onto a cuttlefish
-        
         function vertexAtPosition = GetVertexAtPosition(this, position)
             vertexAtPosition=[];
             for vertex = this.Vertices
@@ -190,8 +187,6 @@ classdef Thread < handle
                     error('cannot introduce an electrode that would cause an overlap')
                 end
             end
-            
-            
             
             %Set previousElectrode. Find electrode with a startVertex
             %closest to the startVertex but less than it
@@ -288,11 +283,13 @@ classdef Thread < handle
                 error('electrode length must be a multiple of the resolution!')
             end
             
+            %Keep adding electrodes until we cannot any longer
+            %TODO: check the details of the exception
             while(true)
                 try
                     this.AddElectrode(start, electrodeLength, electrodeType);
                     start = start + electrodeLength + spacing;
-                catch
+                catch ex
                     break;
                 end
             end
@@ -308,8 +305,8 @@ classdef Thread < handle
             state = [state, arrayfun(@(x) x.Voltage, this.ElectrodedElements)];
         end
         
-        %For use with an ode solver
-        %vars are [disaplcement, velocity, xi, voltage]
+        %For use with an ode solver:
+        %state vars are [disaplcement, velocity, xi, voltage]
         function SetLocalState(this, state)
             index = 1;
             displacements = state(index : index+length(this.Vertices)-1);
@@ -363,7 +360,7 @@ classdef Thread < handle
             end
         end
         
-        %output should be d/dt[disaplcement, velocity, xi, voltage]
+        %For use with an ode solver, output is d/dt[disaplcement, velocity, xi, voltage]
         function state = GetRateLocalState(this)
             state = [];
             state = [state, arrayfun(@(x) x.Velocity, this.Vertices)];
@@ -372,10 +369,12 @@ classdef Thread < handle
             state = [state, arrayfun(@(x) x.DVoltage, this.Electrodes)];
         end
         
+        %The on/off states of the electrodes
         function state = GetGlobalState(this)
             state = arrayfun(@(x) x.GlobalState, this.Electrodes);
         end
         
+        %Set every electrode to the same type
         function SetAllElectrodeTypes(this, electrodeTypeEnum)
         
             for electrode = this.Electrodes
@@ -384,6 +383,7 @@ classdef Thread < handle
             
         end
        
+        %Sets the neighbours of each electrode
         function DefineElectrodeNeighbours(this)
             if(isempty(this.Electrodes))
                 return;
@@ -407,10 +407,10 @@ classdef Thread < handle
             orderedElectrodes(end).NextElectrode = [];
         end
         
+        %A usefule research method for calculating the steady state stretch
+        %given the number of active cells.= 
         function [activeStretch, passiveStretch] = CalculateSteadyStateStretches(this, nCellsActive)
-            
-            
-            
+            %A dummy active element for use in the equation solver
             elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
                     Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
@@ -421,6 +421,7 @@ classdef Thread < handle
             elementActive = this.ElementConstructor(elementInitParams);
             elementActive.Voltage = this.RCCircuit.SourceVoltage;
             
+            %A dummy passive element for use in the equation solver
             elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
                     Vertex(this.StartElement.NaturalLength*this.PreStretch, 0, 0), ...
@@ -432,12 +433,9 @@ classdef Thread < handle
          
             nActiveBlocks = round(this.BlocksPerCell)*nCellsActive;            
             
+            %This may need adjusting for other MaterialParameters
             guesses = linspace(3,6,100);
             vals = arrayfun(@(x)this.CalculateSteadyStateStretchesEqn(x, nActiveBlocks, elementActive, elementPassive), guesses);
-            
-            close all
-            plot(guesses, vals);
-            grid on
             
             initialGuess = 5;
             activeStretch = fzero(@(x) this.CalculateSteadyStateStretchesEqn(x, nActiveBlocks, elementActive, elementPassive), initialGuess);
@@ -448,6 +446,7 @@ classdef Thread < handle
             blocksPerCell = length(this.ElectrodedElements) / length(this.Electrodes);
         end
         
+        %Gets a section of passive membrane between two electrodes
         function elements = GetPassiveSection(this, element)
             elements=element;
             
@@ -457,6 +456,7 @@ classdef Thread < handle
             end
         end
         
+        %This helper method is used in the solver for CalculateSteadyStateStretches. It equals zero at equilibrium 
         function x = CalculateSteadyStateStretchesEqn(this, activeStretch, nActiveBlocks, elementActive, elementPassive)
             elementActive.SetStretchRatioAndXi(activeStretch);
             passiveStretch = this.SteadyStatePassiveStretch(activeStretch, nActiveBlocks);
@@ -481,6 +481,8 @@ classdef Thread < handle
                                       (p*L);
         end
         
+        %Calculates the voltage required to actuate eletrodes such that it
+        %will approach a perscribed steady state stretch
         function voltage = DrivingVoltageForStretch(this, activeStretch)
             passiveStretch = this.SteadyStatePassiveStretch(activeStretch, length(this.ElectrodedElements));
            
@@ -543,16 +545,6 @@ classdef Thread < handle
             elementActive.SetStretchRatioAndXi(lambdaA);
             elementPassive.SetStretchRatioAndXi(lambdaB);
             
-            
-%             guesses=[];
-%             voltages = linspace(3000, 6000, 1000);
-%             for voltage = voltages
-%                 guesses(end+1) = this.EquilibriumEquation(elementActive, elementPassive, voltage);
-%             end
-%             
-%             close all; grid on
-%             plot(voltages, guesses);grid on;
-%             
             initialGuess = 5000;
             sourceVoltage = fzero(@(voltage) this.EquilibriumEquation(elementActive, elementPassive, voltage), initialGuess);
         end
@@ -561,7 +553,6 @@ classdef Thread < handle
             
         
         end
-        
         
         %The root of this equation 
         function x = EquilibriumEquation(this, elementActive, elementPassive, voltage)
@@ -621,6 +612,7 @@ classdef Thread < handle
             
             clc; 
             sigFigs = 2;
+            
             %TODO: DRY the string formatting
             fprintf('Coarsest Resolution: %.2e\n', Utils.RoundSigFigs(resolution, sigFigs));
             fprintf('Source Voltage: %.2e\n', Utils.RoundSigFigs(this.RCCircuit.SourceVoltage, sigFigs));

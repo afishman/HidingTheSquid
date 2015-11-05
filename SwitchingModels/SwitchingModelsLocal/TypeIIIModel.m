@@ -1,5 +1,5 @@
 classdef TypeIIIModel < SwitchingModelLocal
-    %The intention behaviour for this type:
+    %The intented behaviour for this type:
     % 2 neighbours activated -> off
     % 1 neighbour activated  -> on
     % 0 neighbours activated -> off
@@ -13,8 +13,11 @@ classdef TypeIIIModel < SwitchingModelLocal
         ROff2;
     
         %A pair of quadratics for the events function, of the form: (x-a)^2+b
-        ROnA; ROnB
-        ROffA; ROffB
+        ROnA;
+        ROnB
+        
+        ROffA;
+        ROffB
     end
     
     methods
@@ -46,7 +49,7 @@ classdef TypeIIIModel < SwitchingModelLocal
             [this.ROffA, this.ROffB] = Utils.QuadraticCoefficients(this.ROff1, this.ROff2);
         end
         
-        %This way the end electrode spends it time approaching the state of its only neighbour 
+        %This way end electrodes spend their time approaching the state of its only neighbour 
         function source = Source(this, electrode)
            source = sum(arrayfun(@(x) x.StretchRatio, electrode.Neighbours))/2;
         end

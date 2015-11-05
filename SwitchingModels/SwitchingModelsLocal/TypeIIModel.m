@@ -1,5 +1,6 @@
 classdef TypeIIModel < SwitchingModelLocal
-    %The typeI model is the mean strain across the electrode's elements
+    %The source of the typeII model is the mean strain across the previous
+    %electrode's elements
     properties
         ROn
         ROff;
@@ -8,11 +9,11 @@ classdef TypeIIModel < SwitchingModelLocal
     methods
         function this = TypeIIModel(rOn, rOff)
             if(rOn <= 0)
-                error('TypeIModel rOn should be > 0!')
+                error('TypeIIModel rOn should be > 0!')
             end
             
             if(rOff <= 0)
-                error('TypeIModel rOff should be > 0!')
+                error('TypeIIModel rOff should be > 0!')
             end
             
             this.ROn = rOn;

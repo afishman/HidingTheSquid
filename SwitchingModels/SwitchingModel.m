@@ -15,14 +15,12 @@ classdef SwitchingModel < handle
         %changes
         EventsFunValue(this, params);
         
-        %This is 0 for all, 1 for increasing, -1 for decreasing
-        %TODO: Use enums instead, that's really what it should be using, if
-        %they'd put more effort into it
+        %params is 0 for all crossings, 1 for increasing, -1 for decreasing
         EventsFunDirection(this, params);
     end
     
     methods
-        %As a clean design pattern let's always end exactly on a terminal state
+        %For cleanliness let's always end exactly on a terminal state
         function isTerminal = EventsFunIsTerminal(this, params)
             isTerminal = true;
         end

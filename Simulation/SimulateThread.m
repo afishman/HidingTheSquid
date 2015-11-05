@@ -14,12 +14,13 @@ classdef SimulateThread < handle
         %%% Some General properties
         RelativeErrorTolerance = 1e-6;  %ODE relative error tolerance
         SimTime = 0;  %Time taken for the sim to process;
-        PointsPerSecond    = 100;   %Points per second when saving data (using linearly interpolated points) 
+        PointsPerSecond = 100;   %Points per second when saving data (using linearly interpolated points) 
        
     end
     
     methods
         function this=SimulateThread(name, thread)
+            %TODO: Check inputs
             this.Name = name;
             this.Thread = thread;
         end
@@ -80,7 +81,7 @@ classdef SimulateThread < handle
                 outputVars = interp1(t, outputVars, tNew);
                 t = tNew;
                 
-                %write to file - todo save global state too
+                %write to file
                 globalStates = repmat(this.Thread.GetGlobalState, size(outputVars,1), 1);
                 Utils.AppendToFile([t', outputVars, globalStates], SimulateThread.CSVFilename(this.Name));
                 
@@ -93,22 +94,22 @@ classdef SimulateThread < handle
                 this.Thread.SetLocalState(outputVars(end, :));
                 this.Thread.UpdateGlobalStates(t(end));
                 
-                %TODO: is this really necessary?
                 %Cleanup a bit
                 clear outputVars t
             end
         end
              
+        %Events function for the ODE solver
         function [value,isterminal,direction] = EventsFun(this, t, y)
             this.Thread.SetLocalState(y);
             [value,isterminal,direction] = arrayfun(@(x) x.EventsFun(t), this.Thread.Electrodes);
             
-            %handle all off
             value = [t-this.Thread.SwitchAllOff, value];
             isterminal = [true, isterminal];
             direction = [0, direction];
         end
         
+        %Ode function for the ode solver
         function outVars = OdeFun(this, t, y)
             this.Thread.SetLocalState(y);
             outVars = this.Thread.GetRateLocalState';
@@ -118,6 +119,13 @@ classdef SimulateThread < handle
     
     
     methods(Static)
+        %Object info is saved in mat file for reference. This generates a
+        %filename for it
+        %TODO: Use JSON instead of these annoying mat files
+        function filename = SimObjectFilename(name)
+            filename = strcat([SimulateThread.SimsFolder, name, '.mat']);
+        end
+        
         %The name of the simulation object stored in <this.Name>.mat
         function objName = ObjectName
             objName = 'sim';
@@ -127,17 +135,13 @@ classdef SimulateThread < handle
             filename = strcat([SimulateThread.SimsFolder, name, '.csv']);
         end
         
-        %TODO: Use JSON instead of these silly mat files
-        function filename = SimObjectFilename(name)
-            filename = strcat([SimulateThread.SimsFolder, name, '.mat']);
-        end
-        
         function path = SimsFolder()
             path = 'sims/';
         end
     
         %Looks for corresponding simulation data, continues from the last
         %line until t=tMax
+        %name is the path to the object containing the sim
         function ContinueSim(name, tMax)
             simObjFilename = SimulateThread.SimObjectFilename(name);
             if(~exist(simObjFilename, 'file'))

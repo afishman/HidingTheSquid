@@ -1,16 +1,21 @@
 classdef SimViewer < handle
+    %Used to view and analyse simulation data.
     properties
         Sim;
         States;
         RawData;
         Name;
-        %In seconds, how often to take a line of data
+        
+        %In seconds, how often to take a line of data. Use coarser
+        %resolution if the simulation is large and you don't have the
+        %memory for it.
         Resolution = 0.01;
         
         ReportsFolder;
     end
     
     methods (Static)
+        %TODO: Delete this when I make sense of it!
         function viewer = LoadReport(name)
             %TODO: DRY this up into a utility
             path = strcat([DefaultSettings.ReportsFolder, name, '/',name]);
@@ -29,14 +34,10 @@ classdef SimViewer < handle
             
             figure;
             viewer.PlotSource;
-            
-            
         end
     end
     
     methods
-        
-        
         %Pass in the name of sim, not the path
         function this = SimViewer(name, varargin)
             this.ReportsFolder = DefaultSettings.ReportsFolder;
@@ -48,7 +49,6 @@ classdef SimViewer < handle
             if(~exist(SimulateThread.SimObjectFilename(name), 'file'))
                 error(strcat([SimulateThread.SimObjectFilename(name), ' file does not exist']));
             end
-            
             
             simStruct = load(SimulateThread.SimObjectFilename(name), SimulateThread.ObjectName);
             eval(strcat(['this.Sim = simStruct.', SimulateThread.ObjectName]));
@@ -62,8 +62,6 @@ classdef SimViewer < handle
             end
             
             this.LoadCSV;
-            
-            
         end
         
         function name = OutputFolder(this)
@@ -74,19 +72,7 @@ classdef SimViewer < handle
             end
         end
         
-        %TODO: Dont think this actually works
-        function AnimateSim(this)
-            close all;
-            
-            for state = this.States
-                state.SetState;
-                clf
-                state.Thread.Plot
-                title(sprintf('%.2f(s)', state.Time));
-                pause(0.3);
-            end
-        end
-        
+        %plots the length material against time
         function PlotMaterial(this)
             rightElementPositionMatrix = [];
             leftElementPositionMatrix = [];
@@ -126,11 +112,15 @@ classdef SimViewer < handle
             ylabel('Distance (m)');
         end
         
+        %plots the global state against time
         function PlotGlobal(this)
-            
             %%%%Plotting Colours
-            c1 = [1,1,1]; %Cell is on
-            c2 = [0,0,0]; %Cell is off
+            
+            %Cell is on
+            c1 = [1,1,1];
+            
+            %Cell is off
+            c2 = [0,0,0];
             gridColor = [0.3, 0.3, 0.3];
             
             %form the image: x is electrode, y is time
@@ -141,7 +131,6 @@ classdef SimViewer < handle
                 state.SetState;
                 globalStates = [globalStates; arrayfun(@(x) x.GlobalState, electrodes)];
             end
-            
             
             %Make the legend
             x=0;y=-1; ms=15;
@@ -159,7 +148,6 @@ classdef SimViewer < handle
             %Plot the image
             times = this.Times;
             nElectrodes = length(this.Sim.Thread.Electrodes);
-            
             
             %HACK: oh matlab! The hacky things you make me do to get production
             %quality images! (Using imagesc produces blurry eps images)
@@ -188,6 +176,7 @@ classdef SimViewer < handle
             ylabel('Electrode');
         end
         
+        %The time at each state
         function time = Times(this)
             time = arrayfun(@(x) x.Time, this.States);
         end
@@ -240,7 +229,8 @@ classdef SimViewer < handle
             title('Source');
         end
         
-        %plot by key upon the list
+        %plot by key against list. Provides an easy way to plot various
+        %properties
         function PlotByKey(this, key, list)
             time = this.Times;
             
@@ -256,63 +246,63 @@ classdef SimViewer < handle
             grid on
         end
         
+        %Load data from the CSV
         function LoadCSV(this)
             id = fopen(this.Sim.CSVFilename(this.Name), 'r');
             
-            %Read a line
-            this.RawData=[];
-            line = this.TakeLine(id);
-            this.AddToRawData(line);
-            
-            %The rate: pps
-            %Initialise for the while loop
-            count=0;
-            countPeriod=0;
-            prevTime=0;
-            takeLineSum=0;
-            while line~=-1
-                %Increase line count
-                count=count+1;
-                countPeriod=countPeriod+1;
-                
-                %Get the next line
+            try
+                %Read a line
+                this.RawData=[];
                 line = this.TakeLine(id);
+                this.AddToRawData(line);
                 
-                %If we're not at the end
-                if line~=-1
-                    %Add to tSum
-                    dT = line(1) - prevTime;
-                    takeLineSum = takeLineSum + dT;
-                    prevTime = line(1);
+                %The rate: pps
+                %Initialise for the while loop
+                count=0;
+                countPeriod=0;
+                prevTime=0;
+                takeLineSum=0;
+                while line~=-1
+                    %Increase line count
+                    count=count+1;
+                    countPeriod=countPeriod+1;
                     
-                    %Get the data, take everything below t=0
-                    %TODO: This is silly, there should be a time indepndant
-                    %solution here
-                    if (line~=-1) & ((takeLineSum>this.Resolution) | line(1)<=0)
-                        this.AddToRawData(line);
-                        %Reset sum
-                        takeLineSum=0;
+                    %Get the next line
+                    line = this.TakeLine(id);
+                    
+                    %If we're not at the end
+                    if line~=-1
+                        %Add to tSum
+                        dT = line(1) - prevTime;
+                        takeLineSum = takeLineSum + dT;
+                        prevTime = line(1);
+                        
+                        %Get the data, take everything below t=0
+                        %TODO: This is silly, there should be a time indepndant
+                        %solution here
+                        if (line~=-1) & ((takeLineSum>this.Resolution) | line(1)<=0)
+                            this.AddToRawData(line);
+                            %Reset sum
+                            takeLineSum=0;
+                        end
+                        
+                        %Print every 100
+                        if countPeriod==100
+                            clc; fprintf('Time Loaded: %.0fs\n',line(1))
+                            countPeriod=0;
+                        end
                     end
-                    
-                    %Print every 100
-                    if countPeriod==100
-                        clc; fprintf('Time Loaded: %.0fs\n',line(1))
-                        countPeriod=0;
-                    end
-                    
-                    %Break if necessary
-                    %                     if rangeSpecified && (line(1)~=-1) && (tRange(2) <= tLineNum(1))
-                    %                         break
-                    %                     end
                 end
                 
+                this.SetStatesToRawData();
                 
+                %Close the file
+                fclose(id);
+            catch ex
+                %Close the file
+                fclose(id);
+                rethrow(ex)
             end
-            
-            this.SetStatesToRawData();
-            %Close the file
-            fclose('all');
-            
         end
         
         function AddToRawData(this, line)
@@ -325,6 +315,7 @@ classdef SimViewer < handle
             this.States = this.InterpolateRawData(sampleTimes);
         end
         
+        %Interpolate raw data, returning thread states
         function states = InterpolateRawData(this, sampleTimes)
             states=ThreadState.empty;
             
@@ -352,6 +343,7 @@ classdef SimViewer < handle
             this.States = [this.States, this.MakeState(line)];
         end
         
+        %Create a thread state out of a line of raw data
         function state = MakeState(this, line)
             nLocalVars = length(this.Sim.Thread.GetLocalState);
             nGlobalVars = length(this.Sim.Thread.GetGlobalState);
@@ -372,12 +364,13 @@ classdef SimViewer < handle
             localState = line(index : index + nLocalVars - 1);
             index = index + nLocalVars;
             
+            %Create the state
             globalState = round(line(index : index + nGlobalVars - 1));
             state = ThreadState(this.Sim.Thread, t, localState, globalState);
         end
         
         
-        
+        %Returns a line of data
         function line = TakeLine(this, id)
             tline = fgetl(id);
             
@@ -421,6 +414,8 @@ classdef SimViewer < handle
             ylabel('Amplitude');
         end
         
+        %Creates a report. Essentially the data for a simulation along
+        %with a set of accompanying images
         function GenReport(this)
             this.SaveFigure(@this.PlotMaterial, 'material')
             this.SaveFigure(@this.PlotGlobal, 'global_states')
@@ -449,6 +444,9 @@ classdef SimViewer < handle
             saveas(gcf, reportPath, format);
         end
         
+        %Extends the start of a simulation by t by copying the initial thread state.
+        %ForceOff forces all the global states to be off during this
+        %extension
         function ExtendStart(this, t, forceOff)
             if(nargin == 2)
                 forceOff = false;
@@ -469,14 +467,5 @@ classdef SimViewer < handle
             
             this.ResetRawDataAndStates(newStates);
         end
-        
-        function RemoveEnd(this, tMax)
-            
-            for state = this.States
-                
-            end
-        end
-        
     end
-    
 end

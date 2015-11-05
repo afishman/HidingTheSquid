@@ -1,6 +1,6 @@
 classdef SimAnimator
-    %SIMANIMATOR Summary of this class goes here
-    %   Detailed explanation goes here
+    %SIMANIMATOR generates movies of simulations onto the body of a
+    %cuttlefish
     
     properties
         Viewer;
@@ -100,19 +100,10 @@ classdef SimAnimator
                 
                 image(xRange, yRange, flipud(img));
                 
-                
-                
                 xTicks = [xTicks, mean(xRange)];
                 xTickLabels{end+1} = sprintf('t = %.2fs', t);
-                %HACK: Matlab does not have a good way to put titles at the
-                %bottom
-
-                
-                %fontSize = get(gca, 'FontSize');
-                %set(gca,'FontSize', fontSize*JournalFigure.CuttleTextAdjustment)
             end
             
-    
             set(gca, 'YTick',[]);
             set(gca, 'XTick', xTicks)
             set(gca, 'XTickLabel', xTickLabels);
@@ -261,7 +252,6 @@ classdef SimAnimator
         
         %Plot a filled polygon, given a line, start and end
         %color should be uint8
-        %TODO: Add input args
         function PlotFilled(this, startPosition, endPosition, color, axesHandle)
             color = color ./ 255;
             
@@ -279,9 +269,7 @@ classdef SimAnimator
             y = arrayfun(@(x) x.Y, polygonPoints);
             
             fill(x,y,color, 'Parent', axesHandle, 'EdgeColor', color)
-        end
-        
+        end 
     end
-    
 end
 

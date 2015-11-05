@@ -1,43 +1,42 @@
 %Given spacing and a tail
-%clear all
-%
-preStretch = 2.5;
+clear all
 
+%TODO: Write decription here
+
+preStretch = 2.5;
 cellLengthAtPrestretch = 20e-3 * 2.5;
 resolution = 50e-3;
-tail = 3*resolution;
+
+%150 mm on each side
+passiveMembraneSectionLength = 3*resolution;
+
+%Construct a thread
+stretchedLength = cellLengthAtPrestretch + 2*passiveMembraneSectionLength;
+elementConstructor = @(x) FiberConstrainedElement(x,1);
+thread = Thread(stretchedLength, resolution, preStretch, elementConstructor, GentParams.Koh2012);
 
 %Define the switching models
 rOn = 2.9; rOff = 4.2;
 switchingModelLocal = TypeIModel(rOn, rOff);
-%switchingModelLocal = LocalAlwaysOffModel;
 
-timeOff = 25;
-switchingModelExternal = StepModel(0, timeOff);
-%switchingModelExternal = LocalAlwaysOffModel;
-
-stretchedLength = cellLengthAtPrestretch + 2*tail;
-elementConstructor = @(x) FiberConstrainedElement(x,1);
-thread = Thread(stretchedLength, resolution, preStretch, elementConstructor, GentParams.Koh2012);
 thread.SwitchingModelLocal = switchingModelLocal;
-thread.SwitchingModelExternal = switchingModelExternal;
-thread.SwitchAllOff = timeOff;
+thread.SwitchingModelExternal = ExternalAlwaysOffModel;
 
-%Add electrodes
-thread.AddElectrode(tail, cellLengthAtPrestretch, ElectrodeTypeEnum.LocallyControlled);
+%Deactivate all cells after a perscribed amount of time 
+timeOff = 10;
+thread.SwitchAllOff = timeOff;
 
 %Find the driving voltage
 activatedCellStretch = 5;
-thread.RCCircuit.SourceVoltage = thread.DrivingVoltageForStretch(activatedCellStretch);
+thread.RCCircuit.SourceVoltage = 5600;
+%thread.RCCircuit.SourceVoltage = thread.DrivingVoltageForStretch(activatedCellStretch);
 thread.RCCircuit.Resistance = 1e8;
 
-close all
-thread.Plot
+%Add electrodes
+thread.AddElectrode(passiveMembraneSectionLength, cellLengthAtPrestretch, ElectrodeTypeEnum.LocallyControlled);
 
-
-%Make a simulator object and run for 7s
-simName = mfilename;
-sim = SimulateThread(simName, thread);
+%Make a simulator and run it
+sim = SimulateThread(mfilename, thread);
 sim.RunSim(timeOff*1.2);
 
 %View the output

@@ -69,18 +69,3 @@ Adjusting Other model parameters:
 I use defaults for the rest of the parameters. If you want to view/adjust these look in:
 - Element subclasses
 - MaterialParameters (adjust the static Default method, which was a silly thing to implement)
-
------------------------
-Extending the model
------------------------
-You should make a class that inherits from Element.
-
-I have tried to anticipate what will need to be changed for the new model in the the Abstract methods of Element:
-- Capacitance
-- CapacitanceDot (rate of capacirance)
-- Width
-- NaturalWidth
-- GentParams Default
-- RCCircuit Default
-
-this works for at least the fiber constrained model.

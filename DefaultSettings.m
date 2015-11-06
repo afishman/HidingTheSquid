@@ -1,5 +1,5 @@
 classdef DefaultSettings
     properties(Constant)
-        ReportsFolder = '../reports/';
+        ReportsFolder = '../Reports/';
     end
 end

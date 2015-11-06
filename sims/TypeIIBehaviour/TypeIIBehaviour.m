@@ -1,5 +1,6 @@
+%Simulation illustrating the type 2 behaviour
+
 %These are optimal paramters
-%TODO: automate the creation of optimally spaced threads
 preStretch = 2.5;
 nCells = 30;
 cellLengthAtPrestretch = 20e-3 * preStretch;
@@ -28,8 +29,8 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
 thread.RCCircuit.Resistance = 1e7;
             
 %Uncomment this to plot the thread! (it is currently in prestretch config)
-% showNodes = true;
-% sim.Thread.Plot(showNodes);
+thread.Plot(false);
+return
 
 %Make a simulator object and run for 7s
 simName = mfilename;

@@ -15,12 +15,6 @@ switchingModelLocal = TypeIIIModel(rOn1, rOn2, rOff1, rOff2);
 tOn = 0; tOff = 20;
 switchingModelExternal = StepModel(tOn, tOff);
 
-%NOTE: RCCircuit.Default could have been used here, This is for
-%illustrative purposes
-resistance = 200;
-sourceVoltage = 3459.5;
-rcCircuit = RCCircuit(resistance, sourceVoltage);
-
 %initialises a thread with equally spaced, locally controlled electrodes
 thread = Thread.ConstructThreadWithSpacedElectrodes( ...
                 preStretch, ...

@@ -1,5 +1,7 @@
 classdef SimViewer < handle
     %Used to view and analyse simulation data.
+    %GenReport can be used to export sim data and common analysis images to
+    %a folder
     properties
         Sim;
         States;
@@ -114,13 +116,13 @@ classdef SimViewer < handle
         
         %plots the global state against time
         function PlotGlobal(this)
-            %%%%Plotting Colours
-            
+            %Plotting Colours
             %Cell is on
             c1 = [1,1,1];
             
             %Cell is off
             c2 = [0,0,0];
+            
             gridColor = [0.3, 0.3, 0.3];
             
             %form the image: x is electrode, y is time
@@ -368,7 +370,6 @@ classdef SimViewer < handle
             globalState = round(line(index : index + nGlobalVars - 1));
             state = ThreadState(this.Sim.Thread, t, localState, globalState);
         end
-        
         
         %Returns a line of data
         function line = TakeLine(this, id)

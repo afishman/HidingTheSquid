@@ -8,10 +8,12 @@ classdef SimAnimator
         CuttleCodedImagePath = 'Static/laura_cuttle_coded.bmp';
         CuttleCodedImage;
         
+        %Output cuttlefish colors
         CuttleColor1 = [47 ,117,117];
         CuttleColor2 = [119,200,185];
         
-        MainBodyPixelCode = 64; % Indicates the pixel value on the main vody of the cuttlefish
+        % Indicates the black and white values on the main body of the cuttlefish
+        MainBodyPixelCode = 64; 
         MainBodyColor;
         
         HeadPixelCode = 107;
@@ -22,7 +24,7 @@ classdef SimAnimator
     end
     
     methods
-        
+        %viewer is an instance of SimViewer
         function this=SimAnimator(viewer)
             this.Viewer = viewer;
             this.CuttleCodedImage = Utils.ImportBMPIntoBW(this.CuttleCodedImagePath);
@@ -32,6 +34,7 @@ classdef SimAnimator
             this.FinColor = this.CuttleColor1;
         end
         
+        %Output folder into the ./Sims/ folder
         function RenderToMp4(this)
             %TODO: Dry this up with what is in SimViewer
             writerObj = VideoWriter(['Sims/', this.Viewer.Sim.Name,'.mp4'], 'MPEG-4');
@@ -76,7 +79,6 @@ classdef SimAnimator
             totalHeight = imgHeight + paddingHeight;
             
             set(figHandle,'Position', [100, 100, totalWidth, totalHeight]);
-            
             
             hold on
             
@@ -222,18 +224,16 @@ classdef SimAnimator
             img3D(mask) = colorBlock(mask);
         end
         
-        %%%%%%%%A quadratic bezier
-        function linePoints = bezQuad(this)
+        %A quadratic bezier
+        function linePoints = BezQuad(this)
             
             %The number of ppoints
             nPts=100;
             
             %The control points
-            P=[
-                0,0;
-                -1,0;
-                2,2;
-                ];
+            P=[0,0;
+               -1,0;
+               2,2];
             
             t=linspace(0,1,nPts);
             
@@ -256,11 +256,11 @@ classdef SimAnimator
         function PlotFilled(this, startPosition, endPosition, color, axesHandle)
             color = color ./ 255;
             
-            firstHalf = this.bezQuad;
+            firstHalf = this.BezQuad;
             shift = Point2D(startPosition, 0);
             arrayfun(@(x) x.Transpose(shift), firstHalf);
             
-            secondHalf = fliplr(this.bezQuad);
+            secondHalf = fliplr(this.BezQuad);
             shift = Point2D(endPosition, 0);
             arrayfun(@(x) x.Transpose(shift), secondHalf);
             
@@ -273,4 +273,3 @@ classdef SimAnimator
         end 
     end
 end
-

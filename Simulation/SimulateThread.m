@@ -136,7 +136,7 @@ classdef SimulateThread < handle
         end
         
         function path = SimsFolder()
-            path = 'sims/';
+            path = 'Sims/';
         end
     
         %Looks for corresponding simulation data, continues from the last

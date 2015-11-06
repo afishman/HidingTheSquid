@@ -1,4 +1,5 @@
-%Simulation illustrating the type 2 behaviour
+%Simulation illustrating the type II behaviour. The first cell is the maual
+%which triggers waves of propagation across the rest of the thread.
 
 %These are optimal paramters
 preStretch = 2.5;
@@ -28,17 +29,17 @@ thread = Thread.ConstructThreadWithSpacedElectrodes( ...
 % thread.RCCircuit.SourceVoltage = 5500;
 thread.RCCircuit.Resistance = 1e7;
             
-%Uncomment this to plot the thread! (it is currently in prestretch config)
-thread.Plot(false);
-return
+%%Uncomment this to plot the thread! (it is currently in prestretch config)
+%thread.Plot(false);
+%return
 
 %Make a simulator object and run for 7s
-simName = mfilename;
-sim = SimulateThread(simName, thread);
+sim = SimulateThread(mfilename, thread);
 sim.RunSim(30);
 
 %View the output
 viewer = SimViewer(sim.Name);
+
 close all;
 
 figure
@@ -46,10 +47,3 @@ viewer.PlotMaterial;
 
 figure
 viewer.PlotGlobal;
-
-figure
-viewer.PlotSource;
-
-figure
-viewer.PlotStretchRatio;
-return;

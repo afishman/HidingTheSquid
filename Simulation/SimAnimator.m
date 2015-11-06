@@ -33,7 +33,8 @@ classdef SimAnimator
         end
         
         function RenderToMp4(this)
-            writerObj = VideoWriter(['sims/', this.Viewer.Sim.Name,'.mp4'], 'MPEG-4');
+            %TODO: Dry this up with what is in SimViewer
+            writerObj = VideoWriter(['Sims/', this.Viewer.Sim.Name,'.mp4'], 'MPEG-4');
             writerObj.FrameRate = 30;
             open(writerObj);
             

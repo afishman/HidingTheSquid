@@ -1,4 +1,6 @@
-%These are optimal paramters
+%Illustration of the Type III Behaviour using 30 cells illustrating complex
+%behvaiour
+
 %TODO: automate the creation of optimally spaced threads
 preStretch = 2.5;
 nCells = 30;
@@ -51,10 +53,4 @@ viewer.PlotMaterial;
 
 figure
 viewer.PlotGlobal;
-
-figure
-viewer.PlotSource;
-
-figure
-viewer.PlotStretchRatio;
 return;

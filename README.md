@@ -8,7 +8,7 @@ Basically cephalopods are awesome, especially the way their skin rapidly changes
 
 The magic is in their chromatophores cells - https://www.youtube.com/watch?v=1pJPnZFSy5o - these little ones expand and contract to change the host's perceived skin colour. It would be really cool if one day we could mimic their chromomorphic wizardry into something we could wear.
 
-Anyways, one way we could do that is to get a sheet of Dielectric Elastomer and coat it with a bunch of coloured electrodes as cells. Three independantly controlled chromatophores have already been fabricated: https://www.youtube.com/watch?v=W2CgtJU3ckY
+One way we could do that is to get a sheet of Dielectric Elastomer and coat it with a bunch of coloured electrodes as cells. Three independantly controlled chromatophores have already been fabricated: https://www.youtube.com/watch?v=W2CgtJU3ckY
 
 Then, by coordinating the cells atuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns that propagate over the surface of the skin. Proof of principle can be seen: 
 

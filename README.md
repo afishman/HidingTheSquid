@@ -1,12 +1,16 @@
-Hi all!
-
-Welcome to the squid simulator, I do hope you enjoy using it =]
-
 -----------------------
 Overview
 -----------------------
 
-NOTE: ALL classes are reference types.
+Welcome to the squid simulator. The code here can be used to generate the simulations from the paper: http://rsif.royalsocietypublishing.org/content/12/108/20150281
+
+Basically cephalopods are awesome, especially the way their skin rapidly changes colour. It we be really cool if one day we could mimic their chromomorphic wizardry into something we could wear. The magic is in their chromatophores cells - https://www.youtube.com/watch?v=1pJPnZFSy5o - these little guys expand and contract to change the perceived skin colour.
+
+Anyways, one way we could do this is to get a sheet of Dielectric Elastomer and coat it with a bunch of coloured electrodes. Then, by coordinating the cells atuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns that propagate over the surface of the skin. 
+
+Videos generated with this simulator can be seen:
+Type II Behaviour - https://www.youtube.com/watch?v=H5wG2jPh2cE
+Type III Behaviour - https://www.youtube.com/watch?v=nWg-Lu5Xzm8
 
 ------------
 Output format:
@@ -15,17 +19,18 @@ The `SimulateThread.m` class performs simulations. Output data is stored in the 
 <name>.csv - Stores time, local state and global state data
 <name>.mat - Stores the instance of the SimulateThread object
 
-There are scripts in the /Sims/ folder that generate the simulations in the paper. I didn't include the data here because it was rather large,... and to let you have a good ol' laugh simulating yourself :)
+There are scripts in the /Sims/ folder that generate the simulations in the paper.
 
 ------------
 Viewing the Output:
 ------------
 Use the SimViewer class for this. If too much data is being loaded during class construction, include the resolution argument
 
-This contains many functions view output. Your best buddies here are:
+This contains many functions to view output. Your best buddies here are:
 - PlotMaterial
 - PlotGlobal
 
+TODO: talk about report generation
 
 -----------------------
 More Info
@@ -40,7 +45,6 @@ Basic flow is:
 1. Construct a Thread object
 2. Construct a SimulateThread object using that thread
 3. On the SimulateThread object use `RunSim` to run a simulation from the start (which will OVERWRITE any previous data of the same name)
-
 
 Since large threads take rather long to simulate you can crtl+c out of them. They can be continued with the static SimulateThread.ContinueSim(name, tMax) method. This can help if you want to view the output as you go along.
 
@@ -64,7 +68,7 @@ Adjusting Other model parameters:
 ------------
 I use defaults for the rest of the parameters. If you want to view/adjust these look in:
 - Element subclasses
-- Material_Parameters (adjust the static Default method, which was a silly thing to implement)
+- MaterialParameters (adjust the static Default method, which was a silly thing to implement)
 
 -----------------------
 Extending the model
@@ -80,5 +84,3 @@ I have tried to anticipate what will need to be changed for the new model in the
 - RCCircuit Default
 
 this works for at least the fiber constrained model.
-
-Feel free to abstract more away as necessary. There is also a git repo here, if that's your thing - go ahead and commit forth!

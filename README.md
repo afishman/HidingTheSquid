@@ -4,9 +4,13 @@ Overview
 
 Welcome to the squid simulator. The code here can be used to generate the simulations from the paper: http://rsif.royalsocietypublishing.org/content/12/108/20150281
 
-Basically cephalopods are awesome, especially the way their skin rapidly changes colour. It we be really cool if one day we could mimic their chromomorphic wizardry into something we could wear. The magic is in their chromatophores cells - https://www.youtube.com/watch?v=1pJPnZFSy5o - these little guys expand and contract to change the perceived skin colour.
+Basically cephalopods are awesome, especially the way their skin rapidly changes colour. https://www.youtube.com/watch?v=PmDTtkZlMwM
 
-Anyways, one way we could do this is to get a sheet of Dielectric Elastomer and coat it with a bunch of coloured electrodes. Then, by coordinating the cells atuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns that propagate over the surface of the skin. 
+The magic is in their chromatophores cells - https://www.youtube.com/watch?v=1pJPnZFSy5o - these little ones expand and contract to change the host's perceived skin colour. It would be really cool if one day we could mimic their chromomorphic wizardry into something we could wear.
+
+Anyways, one way we could do that is to get a sheet of Dielectric Elastomer and coat it with a bunch of coloured electrodes as cells. Three independantly controlled chromatophores have already been fabricated: https://www.youtube.com/watch?v=W2CgtJU3ckY
+
+Then, by coordinating the cells atuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns that propagate over the surface of the skin. Proof of principle can be seen: 
 
 Videos generated with this simulator can be seen:
 Type II Behaviour - https://www.youtube.com/watch?v=H5wG2jPh2cE

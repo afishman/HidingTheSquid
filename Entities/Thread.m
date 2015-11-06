@@ -407,8 +407,27 @@ classdef Thread < handle
             orderedElectrodes(end).NextElectrode = [];
         end
         
+        %Bounds of the thread
+        function bounds = Bounds(this)
+            bounds = [this.StartVertex.Position, this.EndVertex.Position];
+        end
+        
+        function blocksPerCell = BlocksPerCell(this)
+            blocksPerCell = length(this.ElectrodedElements) / length(this.Electrodes);
+        end
+        
+        %Gets a section of passive membrane between two electrodes
+        function elements = GetPassiveSection(this, element)
+            elements=element;
+            
+            while(~isempty(element) && isempty(element.RCCircuit))
+                elements(end+1) = element;
+                element = element.NextElement;
+            end
+        end
+       
         %A usefule research method for calculating the steady state stretch
-        %given the number of active cells.= 
+        %given the number of active cells.
         function [activeStretch, passiveStretch] = CalculateSteadyStateStretches(this, nCellsActive)
             %A dummy active element for use in the equation solver
             elementInitParams = ElementInitParams(...
@@ -440,20 +459,6 @@ classdef Thread < handle
             initialGuess = 5;
             activeStretch = fzero(@(x) this.CalculateSteadyStateStretchesEqn(x, nActiveBlocks, elementActive, elementPassive), initialGuess);
             passiveStretch = SteadyStatePassiveStretch(this, activeStretch, nActiveBlocks);
-        end
-        
-        function blocksPerCell = BlocksPerCell(this)
-            blocksPerCell = length(this.ElectrodedElements) / length(this.Electrodes);
-        end
-        
-        %Gets a section of passive membrane between two electrodes
-        function elements = GetPassiveSection(this, element)
-            elements=element;
-            
-            while(~isempty(element) && isempty(element.RCCircuit))
-                elements(end+1) = element;
-                element = element.NextElement;
-            end
         end
         
         %This helper method is used in the solver for CalculateSteadyStateStretches. It equals zero at equilibrium 
@@ -516,13 +521,15 @@ classdef Thread < handle
             voltage = fzero(@(x)this.EquilibriumEquation(elementActive, elementPassive, x), initialGuess);
         end
         
-        %as derived in the paper
+        %Calculates the voltage required drive the active cells to a
+        %steady stretch of lambdaA, while the passive membrane will
+        %approach a stretch of lambdaB.
+        %The formula is derived in the paper
         %TODO: Cleanup the bodgy stress calculations
-        function sourceVoltage = CalculateDrivingVoltage(this)  
-            %TODO: not hardcoded, maybe
-            %These hardcoded parameters discretise nicely :)
-            lambdaA = 5;
-            lambdaB = 1.25;
+        function sourceVoltage = CalculateDrivingVoltage(this, lambdaA, lambdaB)  
+            %HINT: These parameters discretise nicely :)
+            %lambdaA = 5;
+            %lambdaB = 1.25;
             
             elementInitParams = ElementInitParams(...
                     Vertex(0, 0, 0), ...
@@ -548,13 +555,9 @@ classdef Thread < handle
             initialGuess = 5000;
             sourceVoltage = fzero(@(voltage) this.EquilibriumEquation(elementActive, elementPassive, voltage), initialGuess);
         end
-       
-        function SetAtSteadyState(this, globalState)
-            
         
-        end
-        
-        %The root of this equation 
+        %When the root of this equation is zero, forces are balanced
+        %between the two elements
         function x = EquilibriumEquation(this, elementActive, elementPassive, voltage)
              elementActive.Voltage = voltage;
             
@@ -565,18 +568,15 @@ classdef Thread < handle
              passiveFaceArea = elementPassive.LengthFaceArea;
              passiveStress = elementPassive.MaterialStress;
              
-             x =  (electricalStress - activeStress)*activeFaceArea + passiveStress*passiveFaceArea;
-        end
-        
-        function bounds = Bounds(this)
-            bounds = [this.StartVertex.Position, this.EndVertex.Position];
+             x = (electricalStress - activeStress)*activeFaceArea + passiveStress*passiveFaceArea;
         end
     end
     
     methods(Static)
         %initialises a thread with equally spaced, locally controlled electrodes
         %The start electrode is an externally controlled cell
-        %uses the default rc circuit for the element
+        %uses the default rc circuit resistance for the element
+        %but 
         function this = ConstructThreadWithSpacedElectrodes( ...
                 preStretch, ...
                 cellLengthAtPrestretch, ...

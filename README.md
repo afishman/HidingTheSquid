@@ -13,8 +13,12 @@ One way we could do that is to get a sheet of Dielectric Elastomer and coat it w
 By coordinating cell actuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns which propagate over the surface of the skin.
 
 Videos generated with this simulator can be seen:
+
 Type II Behaviour - https://www.youtube.com/watch?v=H5wG2jPh2cE
+
 Type III Behaviour - https://www.youtube.com/watch?v=nWg-Lu5Xzm8
+
+This was the first non-tiny MATLAB project I have ever done... and I didn't enjoy the way they implemented OOP here so much. Also its proprietary-ness makes this code less accessible for many people. So I am sorry for this, and will try to make more my projects more accesible in the future :)
 
 ------------
 Performing simulations:

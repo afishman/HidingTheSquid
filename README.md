@@ -12,7 +12,7 @@ Here we consider Dielectric Elastomer coated with a bunch of coloured electrodes
 
 By coordinating cell actuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns which propagate over the surface of the skin.
 
-Videos generated with this simulator can be seen:
+Videos generated with this simulator:
 
 Type II Behaviour - https://www.youtube.com/watch?v=H5wG2jPh2cE
 

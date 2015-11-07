@@ -13,10 +13,8 @@ Here we consider Dielectric Elastomer coated with a bunch of coloured electrodes
 By coordinating cell actuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns which propagate over the surface of the skin.
 
 Videos generated with this simulator:
-
-Type II Behaviour - https://www.youtube.com/watch?v=H5wG2jPh2cE
-
-Type III Behaviour - https://www.youtube.com/watch?v=nWg-Lu5Xzm8
+- Type II Behaviour https://www.youtube.com/watch?v=H5wG2jPh2cE
+- Type III Behaviour https://www.youtube.com/watch?v=nWg-Lu5Xzm8
 
 This was the first non-tiny MATLAB project I have ever done... and I didn't enjoy the way they implemented OOP here so much. Also its proprietary-ness makes this code less accessible for many people. In the future I'd like to make these things more accesible :)
 
@@ -38,11 +36,11 @@ Since large threads take rather long to simulate you can crtl+c out of them. The
 ------------
 Output format:
 ------------
-Output data from the `SimulateThread.m` class is stored in the /Sims/ folder with two files:
-<name>.csv - Stores time, local state and global state data
-<name>.mat - Stores the instance of the SimulateThread object
+Output data from the `SimulateThread.m` class is stored in the `/Sims/` folder with two files:
+ - `<name>.csv` stores time, local state and global state data
+ - `<name>.mat` stores the instance of the SimulateThread object
 
-There are scripts in the /Sims/ folder that generate the simulations in the paper.
+There are scripts in the `/Sims/` folder that generate the simulations using each type of behaviour discussed in the paper.
 
 ------------
 Viewing the Output:

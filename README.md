@@ -1,5 +1,5 @@
 -----------------------
-Overview
+Cephalopod City!
 -----------------------
 
 Welcome to the squid skin simulator! The code here can be used to generate the simulations from the paper: http://rsif.royalsocietypublishing.org/content/12/108/20150281
@@ -26,9 +26,12 @@ Performing simulations:
 Look at the examples in the /Sims/ folder for direction.
 
 Basic flow is:
+
 1. Construct a Thread object
-2. Construct a SimulateThread object using that thread
-3. On the SimulateThread object use `RunSim` to run a simulation from the start (which will OVERWRITE any previous data of the same name)
+
+1. Construct a SimulateThread object using that thread
+
+1. On the SimulateThread object use `RunSim` to run a simulation from the start (which will OVERWRITE any previous data of the same name)
 
 Since large threads take rather long to simulate you can crtl+c out of them. They can be continued with the static SimulateThread.ContinueSim(name, tMax) method. This can help if you want to view the output as you go along.
 

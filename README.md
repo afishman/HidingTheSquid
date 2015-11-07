@@ -4,11 +4,11 @@ Overview
 
 Welcome to the squid skin simulator! The code here can be used to generate the simulations from the paper: http://rsif.royalsocietypublishing.org/content/12/108/20150281
 
-Basically cephalopods are awesome, especially the way their skin rapidly changes colour. https://www.youtube.com/watch?v=PmDTtkZlMwM
+Cephalopods are awesome, especially the way their skin rapidly changes colour. https://www.youtube.com/watch?v=PmDTtkZlMwM
 
-The magic is in their chromatophores cells - https://www.youtube.com/watch?v=1pJPnZFSy5o - these little ones expand and contract to change the host's perceived skin colour. It would be really cool if one day we could mimic their chromomorphic wizardry into something wearable.
+The magic is in their chromatophores cells - https://www.youtube.com/watch?v=1pJPnZFSy5o - these little ones expand and contract to change the host's perceived skin colour. Perhaps one day we could mimic their chromomorphic wizardry into something wearable.
 
-One way we could do that is to get a sheet of Dielectric Elastomer and coat it with a bunch of coloured electrodes to mimic the cells. Three independantly controlled artificial chromatophores have already been fabricated: https://www.youtube.com/watch?v=W2CgtJU3ckY
+Here we consider Dielectric Elastomer coated with a bunch of coloured electrodes that serve as the cells. Three independantly controlled artificial chromatophores have already been fabricated: https://www.youtube.com/watch?v=W2CgtJU3ckY
 
 By coordinating cell actuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns which propagate over the surface of the skin.
 
@@ -18,7 +18,7 @@ Type II Behaviour - https://www.youtube.com/watch?v=H5wG2jPh2cE
 
 Type III Behaviour - https://www.youtube.com/watch?v=nWg-Lu5Xzm8
 
-This was the first non-tiny MATLAB project I have ever done... and I didn't enjoy the way they implemented OOP here so much. Also its proprietary-ness makes this code less accessible for many people. So I am sorry for this, and will try to make more my projects more accesible in the future :)
+This was the first non-tiny MATLAB project I have ever done... and I didn't enjoy the way they implemented OOP here so much. Also its proprietary-ness makes this code less accessible for many people. In the future I'd like to make these things more accesible :)
 
 ------------
 Performing simulations:

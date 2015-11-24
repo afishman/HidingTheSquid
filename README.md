@@ -16,7 +16,7 @@ Videos generated with this simulator:
 - Type II Behaviour https://www.youtube.com/watch?v=H5wG2jPh2cE
 - Type III Behaviour https://www.youtube.com/watch?v=nWg-Lu5Xzm8
 
-This was the first non-tiny MATLAB project I have ever done... and I didn't enjoy the way they implemented OOP here so much. The lack of package management also makes it hard to grow projects. Also its proprietary-ness makes this code less accessible for many people. In the future I'd like to make these things more accesible :)
+This was the first non-tiny MATLAB project I have ever done... and I didn't enjoy the way they implemented OOP. The lack of package management also makes it hard to grow projects. Also its proprietary-ness makes this code less accessible for many people. In the future I'd like to make these things more accesible :)
 
 ------------
 Performing simulations:

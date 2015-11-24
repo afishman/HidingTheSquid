@@ -21,17 +21,17 @@ This was the first non-tiny MATLAB project I have ever done... and I didn't enjo
 ------------
 Performing simulations:
 ------------
-Look at the examples in the /Sims/ folder for direction.
+Look at the examples in the `/Sims/` folder for direction.
 
 Basic flow is:
 
-1. Construct a Thread object
+1. Construct a `Thread` object
 
-1. Construct a SimulateThread object using that thread
+1. Construct a `SimulateThread` object using that thread
 
 1. On the SimulateThread object use `RunSim` to run a simulation from the start (which will OVERWRITE any previous data of the same name)
 
-Since large threads take rather long to simulate you can crtl+c out of them. They can be continued with the static SimulateThread.ContinueSim(name, tMax) method. This can help if you want to view the output as you go along.
+Since large threads take rather long to simulate you can crtl+c out of them. They can be continued with the static `SimulateThread.ContinueSim(name, tMax)` method. This can help if you want to view the output as you go along.
 
 ------------
 Output format:
@@ -59,7 +59,7 @@ Constructing Threads:
 
 When you construct your thread, view it with Thread.Plot
 
-In general, use the static Thread.ConstructThreadWithSpacedElectrodes to construct your thread (the actual Thread constructor provides a more flexible way, but will require more work to make it sim ready). This makes a thread with equally spaced, locally controlled electrodes, with the first electrode externally controlled
+In general, use the static `Thread.ConstructThreadWithSpacedElectrodes` to construct your thread (the actual Thread constructor provides a more flexible way, but will require more work to make it sim ready). This makes a thread with equally spaced, locally controlled electrodes, with the first electrode externally controlled
 
 WARNING: This tries to figure out the coarsest possible element length, so keep an ```I''' on it. If it messes up you might get one that is stupidly coarse (though it works as it should for the provided sims)
 

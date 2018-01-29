@@ -1,84 +1,76 @@
-Hi all!
-
-Welcome to the squid simulator, I do hope you enjoy using it =]
-
 -----------------------
-Overview
+Cephalopod City!
 -----------------------
 
-NOTE: ALL classes are reference types.
+Welcome to the squid skin simulator! The code here can be used to generate the simulations from the paper: http://rsif.royalsocietypublishing.org/content/12/108/20150281
 
-------------
-Output format:
-------------
-The `SimulateThread.m` class performs simulations. Output data is stored in the /Sims/ folder with two files:
-<name>.csv - Stores time, local state and global state data
-<name>.mat - Stores the instance of the SimulateThread object
+Cephalopods are awesome, especially the way their skin rapidly changes colour. https://www.youtube.com/watch?v=PmDTtkZlMwM
 
-There are scripts in the /Sims/ folder that generate the simulations in the paper. I didn't include the data here because it was rather large,... and to let you have a good ol' laugh simulating yourself :)
+The magic is in their chromatophores cells - https://www.youtube.com/watch?v=1pJPnZFSy5o - these little ones expand and contract to change the host's perceived skin colour. Perhaps one day we could mimic their chromomorphic wizardry into something wearable.
 
-------------
-Viewing the Output:
-------------
-Use the SimViewer class for this. If too much data is being loaded during class construction, include the resolution argument
+Here we consider Dielectric Elastomer coated with a bunch of coloured electrodes that serve as the cells. Three independantly controlled artificial chromatophores have already been fabricated: https://www.youtube.com/watch?v=W2CgtJU3ckY
 
-This contains many functions view output. Your best buddies here are:
-- PlotMaterial
-- PlotGlobal
+By coordinating cell actuation in a cellular-automata like fashion, we can impose simple rules that yield complex patterns which propagate over the surface of the skin.
 
+Videos generated with this simulator:
+- Type II Behaviour https://www.youtube.com/watch?v=H5wG2jPh2cE
+- Type III Behaviour https://www.youtube.com/watch?v=nWg-Lu5Xzm8
 
------------------------
-More Info
------------------------
+This was the first non-tiny MATLAB project I have ever done... and I didn't enjoy the way they implemented objects. The lack of package management also makes it hard to grow projects. Also its proprietary-ness makes this code less accessible for many people. In the future I'd like to make these things more accesible :)
 
 ------------
 Performing simulations:
 ------------
-Look at the examples in the /Sims/ folder, they will give you much direction.
+Look at the examples in the `/Sims/` folder for direction.
 
 Basic flow is:
-1. Construct a Thread object
-2. Construct a SimulateThread object using that thread
-3. On the SimulateThread object use `RunSim` to run a simulation from the start (which will OVERWRITE any previous data of the same name)
 
+1. Construct a `Thread` object
 
-Since large threads take rather long to simulate you can crtl+c out of them. They can be continued with the static SimulateThread.ContinueSim(name, tMax) method. This can help if you want to view the output as you go along.
+1. Construct a `SimulateThread` object using that thread
+
+1. On the SimulateThread object use `RunSim` to run a simulation from the start (which will OVERWRITE any previous data of the same name)
+
+Since large threads take rather long to simulate you can crtl+c out of them. They can be continued with the static `SimulateThread.ContinueSim(name, tMax)` method. This can help if you want to view the output as you go along.
+
+------------
+Output format:
+------------
+Output data from the `SimulateThread.m` class is stored in the `/Sims/` folder with two files:
+ - `<name>.csv` stores time, local state and global state data
+ - `<name>.mat` stores the instance of the SimulateThread object
+
+There are scripts in the `/Sims/` folder that generate the simulations using each type of behaviour discussed in the paper.
+
+------------
+Viewing the Output:
+------------
+Use the `SimViewer` class for this. If too much data is being loaded during class construction, include the resolution argument
+
+`SimViewer` contains many functions to view output. Your best buddies here are:
+- PlotMaterial
+- PlotGlobal
+
+TODO: talk about report generation
 
 ------------
 Constructing Threads:
 ------------
+
 When you construct your thread, view it with Thread.Plot
 
-In general, use the static Thread.ConstructThreadWithSpacedElectrodes to construct your thread (the actual Thread constructor provides a more flexible way, but will require more work to make it sim ready). This makes a thread with equally spaced, locally controlled electrodes, with the first electrode externally controlled
+In general, use the static `Thread.ConstructThreadWithSpacedElectrodes` to construct your thread (the actual Thread constructor provides a more flexible way, but will require more work to make it sim ready). This makes a thread with equally spaced, locally controlled electrodes, with the first electrode externally controlled
 
-WARNING: This tries to figure out the coarsest possible element length, so keep an ```I''' on it. If it messes up you might get one that is stupidly coarse 
-(though works as it should for the provided sims)
+WARNING: This tries to figure out the coarsest possible element length, so keep an ```I''' on it. If it messes up you might get one that is stupidly coarse (though it works as it should for the provided sims)
 
 Prior to constructing the thread you'll need to construct the following:
 - LocalSwitchingModel (for the self-sensing cells, look in the SwitchingModelsLocal folder)
-- ExternalSwitchingModel (look in the SwitchingModelsExternal folder, includes cyclic/step) *** now includes insightful static Demo methods ***
+- ExternalSwitchingModel (look in the SwitchingModelsExternal folder, includes cyclic/step)
 - ... as well as arguments for the number of cells, prestretch, their dimensions and spacing
 
 ------------
 Adjusting Other model parameters:
 ------------
-I use defaults for the rest of the parameters. If you want to view/adjust these look in:
+Other things that you may want to adjust:
 - Element subclasses
-- Material_Parameters (adjust the static Default method, which was a silly thing to implement)
-
------------------------
-Extending the model
------------------------
-You should make a class that inherits from Element.
-
-I have tried to anticipate what will need to be changed for the new model in the the Abstract methods of Element:
-- Capacitance
-- CapacitanceDot (rate of capacirance)
-- Width
-- NaturalWidth
-- GentParams Default
-- RCCircuit Default
-
-this works for at least the fiber constrained model.
-
-Feel free to abstract more away as necessary. There is also a git repo here, if that's your thing - go ahead and commit forth!
+- MaterialParameters

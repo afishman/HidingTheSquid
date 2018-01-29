@@ -17,7 +17,7 @@ passiveMembraneSectionLength = 3*resolution;
 
 %Construct a thread
 stretchedLength = cellLengthAtPrestretch + 2*passiveMembraneSectionLength;
-elementConstructor = @(x) FiberConstrainedElement(x,1);
+elementConstructor = @(x) FiberConstrainedElement(x);
 thread = Thread(stretchedLength, resolution, preStretch, elementConstructor, GentParams.Koh2012);
 
 %2.9 > prestretch; 4.2 < steady state stretch

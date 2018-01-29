@@ -1,0 +1,24 @@
+
+
+clear all
+close all
+
+preStretch = 3;
+cellLengthAtPrestretch = 10;
+resolution = 10;
+passiveMembraneSectionLength = 10;
+stretchedLength = 90;
+elementConstructor = @(x) FiberConstrainedElement(x);
+
+thread = Thread(stretchedLength, resolution, preStretch, elementConstructor, GentParams.Koh2012);
+
+for i=0:4
+    thread.AddElectrode(i*2*cellLengthAtPrestretch, cellLengthAtPrestretch, ElectrodeTypeEnum.ExternallyControlled);
+end
+
+thread.Plot()
+
+sim = SimulateThread(mfilename, thread);
+sim.RunSim(10);
+
+viewer = SimViewer(
